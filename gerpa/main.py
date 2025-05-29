@@ -186,21 +186,24 @@ dependencies:
   - python=3.12.9
   - pip=25.1
   - pip:
-    - click==8.2.1
-    - pydantic==2.11.5
-    - python-dotenv==1.1.0
-    - pyyaml==6.0.2
-    - requests==2.32.3
-    - openai==1.82.0
-    - google-genai==1.17.0
-    - ollama==0.4.9
-    - pandas==2.2.3
-    - numpy==2.2.6
-    - matplotlib==3.10.3
-    - seaborn==0.13.2
-    - scikit-learn==1.6.1
-    - jupyter==1.1.1
-    - ipykernel==6.29.5
+    - -r requirements.txt
+"""
+
+REQUIREMENTS = """click==8.2.1
+pydantic==2.11.5
+python-dotenv==1.1.0
+pyyaml==6.0.2
+requests==2.32.3
+openai==1.82.0
+google-genai==1.17.0
+ollama==0.4.9
+pandas==2.2.3
+numpy==2.2.6
+matplotlib==3.10.3
+seaborn==0.13.2
+scikit-learn==1.6.1
+jupyter==1.1.1
+ipykernel==6.29.5
 """
 
 LLMPROVIDER_CODE = '''"""
@@ -1108,6 +1111,7 @@ def init(project_name: str, git: bool):
     files = {
         '.gitignore': GITIGNORE_TEMPLATE,
         'environment.yml': formatted_conda_env_template,
+        'requirements.txt': REQUIREMENTS,
         'llm_provider.py': LLMPROVIDER_CODE,
         'evaluator.py': EVALUATOR_CODE,
         'experiment.ipynb': NOTEBOOK_CODE,
