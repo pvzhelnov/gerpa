@@ -190,7 +190,7 @@ dependencies:
     - pydantic==2.11.5
     - python-dotenv==1.1.0
     - pyyaml==6.0.2
-    - requests==2.32.
+    - requests==2.32.3
     - openai==1.82.0
     - google-genai==1.17.0
     - ollama==0.4.9
