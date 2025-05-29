@@ -495,7 +495,7 @@ class LLMAgent:
         responses_dir.mkdir(exist_ok=True)
         
         timestamp_str = response.timestamp.strftime("%Y%m%d_%H%M%S")
-        response_file = responses_dir / f"{timestamp_str}_{prompt_hash}_{response.provider}.yaml"
+        response_file = responses_dir / f"{timestamp_str}_{prompt_hash}_{response.provider}.yml"
         
         response_data = {
             "content": response.content.model_dump(),  # to dict
@@ -856,7 +856,7 @@ class EvaluationRunner:
             return {}
             
         # Load all response files
-        response_files = list(responses_path.glob("*.yaml"))
+        response_files = list(responses_path.glob("*.yml"))
         if not response_files:
             self.logger.warning(f"No YAML files found in {responses_path}")
             return {}
@@ -1030,7 +1030,7 @@ class EvaluationRunner:
             json.dump(results, f, indent=2, default=str)
             
         # Save as YAML
-        yaml_file = output_path / f"eval_results_{timestamp}.yaml"
+        yaml_file = output_path / f"eval_results_{timestamp}.yml"
         with open(yaml_file, 'w') as f:
             yaml.dump(results, f, default_flow_style=False)
             
