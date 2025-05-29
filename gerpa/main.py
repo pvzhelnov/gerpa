@@ -14,6 +14,7 @@ from pathlib import Path
 from datetime import datetime
 from typing import Dict, Any, List, Optional
 import hashlib
+import importlib.util
 
 # Template files content
 GITIGNORE_TEMPLATE = """# Python
@@ -1149,13 +1150,43 @@ def init(project_name: str, git: bool):
 @click.option('--output-dir', default='eval_results', help='Directory to save evaluation results')
 def run_evals(responses_dir: str, output_dir: str):
     """Run evaluations on all response files"""
-    runner = EvaluationRunner()
-    results = runner.run_evals(responses_dir, output_dir)
-    
-    if not results:
-        click.echo("No evaluations were run. Check if response files exist.")
+    # Find the evaluator.py file in current directory or project root
+    evaluator_path = None
+    current_dir = Path.cwd()
+
+    # Check current directory first
+    if (current_dir / 'evaluator.py').exists():
+        evaluator_path = current_dir / 'evaluator.py'
+    # Check if we're in a subdirectory of a project
     else:
-        click.echo(f"✅ Evaluations completed. Results saved to {output_dir}")
+        for parent in current_dir.parents:
+            if (parent / 'evaluator.py').exists():
+                evaluator_path = parent / 'evaluator.py'
+                break
+    
+    if not evaluator_path:
+        click.echo("Error: evaluator.py not found. Make sure you're in a project directory.")
+        return
+
+    # Dynamically import the evaluator module
+    spec = importlib.util.spec_from_file_location("evaluator", evaluator_path)
+    evaluator_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(evaluator_module)
+    
+    # Change to the project directory for relative paths to work
+    original_cwd = os.getcwd()
+    os.chdir(evaluator_path.parent)
+    
+    try:
+        runner = evaluator_module.EvaluationRunner()
+        results = runner.run_evals(responses_dir, output_dir)
+        
+        if not results:
+            click.echo("No evaluations were run. Check if response files exist.")
+        else:
+            click.echo(f"✅ Evaluations completed. Results saved to {output_dir}")
+    finally:
+        os.chdir(original_cwd)
 
 
 @cli.command()
