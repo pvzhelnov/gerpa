@@ -1,0 +1,4 @@
+response_file,response_name,provider,model,timestamp,eval_name,expected,actual_result,matches_expected,score,eval_expected,eval_actual,metadata
+20250529_020903_115049a2_gemini.yml,,gemini,gemini-1.5-flash,2025-05-29T02:09:03.071892,NAME_OK,pass,fail,False,0.0,Manual evaluation,Manual: fail,{'reason': 'Manual evaluation'}
+20250529_020903_115049a2_gemini.yml,,gemini,gemini-1.5-flash,2025-05-29T02:09:03.071892,CODE_OK,pass,pass,True,1.0,Manual evaluation,Manual: pass,{'reason': 'Manual evaluation'}
+20250529_020903_115049a2_gemini.yml,,gemini,gemini-1.5-flash,2025-05-29T02:09:03.071892,CAPITAL_OK,skip,skip,True,0.0,Manual evaluation,Manual: skip,{'reason': 'Manual evaluation'}

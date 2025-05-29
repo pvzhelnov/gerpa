@@ -1,0 +1,166 @@
+by_evaluator:
+  CAPITAL_OK:
+    matches_expected_count: !!python/object/apply:numpy._core.multiarray.scalar
+    - &id001 !!python/object/apply:numpy.dtype
+      args:
+      - f8
+      - false
+      - true
+      state: !!python/tuple
+      - 3
+      - <
+      - null
+      - null
+      - null
+      - -1
+      - -1
+      - 0
+    - !!binary |
+      AAAAAAAA8D8=
+    matches_expected_mean: !!python/object/apply:numpy._core.multiarray.scalar
+    - *id001
+    - !!binary |
+      AAAAAAAA8D8=
+    matches_expected_sum: !!python/object/apply:numpy._core.multiarray.scalar
+    - *id001
+    - !!binary |
+      AAAAAAAA8D8=
+    score_mean: !!python/object/apply:numpy._core.multiarray.scalar
+    - *id001
+    - !!binary |
+      AAAAAAAAAAA=
+  CODE_OK:
+    matches_expected_count: !!python/object/apply:numpy._core.multiarray.scalar
+    - *id001
+    - !!binary |
+      AAAAAAAA8D8=
+    matches_expected_mean: !!python/object/apply:numpy._core.multiarray.scalar
+    - *id001
+    - !!binary |
+      AAAAAAAA8D8=
+    matches_expected_sum: !!python/object/apply:numpy._core.multiarray.scalar
+    - *id001
+    - !!binary |
+      AAAAAAAA8D8=
+    score_mean: !!python/object/apply:numpy._core.multiarray.scalar
+    - *id001
+    - !!binary |
+      AAAAAAAA8D8=
+  NAME_OK:
+    matches_expected_count: !!python/object/apply:numpy._core.multiarray.scalar
+    - *id001
+    - !!binary |
+      AAAAAAAA8D8=
+    matches_expected_mean: !!python/object/apply:numpy._core.multiarray.scalar
+    - *id001
+    - !!binary |
+      AAAAAAAAAAA=
+    matches_expected_sum: !!python/object/apply:numpy._core.multiarray.scalar
+    - *id001
+    - !!binary |
+      AAAAAAAAAAA=
+    score_mean: !!python/object/apply:numpy._core.multiarray.scalar
+    - *id001
+    - !!binary |
+      AAAAAAAAAAA=
+by_model:
+  gemini-1.5-flash:
+    matches_expected_count: !!python/object/apply:numpy._core.multiarray.scalar
+    - *id001
+    - !!binary |
+      AAAAAAAACEA=
+    matches_expected_mean: !!python/object/apply:numpy._core.multiarray.scalar
+    - *id001
+    - !!binary |
+      8tJNYhBY5T8=
+    matches_expected_sum: !!python/object/apply:numpy._core.multiarray.scalar
+    - *id001
+    - !!binary |
+      AAAAAAAAAEA=
+    score_mean: !!python/object/apply:numpy._core.multiarray.scalar
+    - *id001
+    - !!binary |
+      HVpkO99P1T8=
+by_provider:
+  gemini:
+    matches_expected_count: !!python/object/apply:numpy._core.multiarray.scalar
+    - *id001
+    - !!binary |
+      AAAAAAAACEA=
+    matches_expected_mean: !!python/object/apply:numpy._core.multiarray.scalar
+    - *id001
+    - !!binary |
+      8tJNYhBY5T8=
+    matches_expected_sum: !!python/object/apply:numpy._core.multiarray.scalar
+    - *id001
+    - !!binary |
+      AAAAAAAAAEA=
+    score_mean: !!python/object/apply:numpy._core.multiarray.scalar
+    - *id001
+    - !!binary |
+      HVpkO99P1T8=
+confusion_data:
+- eval_name: NAME_OK
+  y_pred:
+  - fail
+  y_true:
+  - pass
+- eval_name: CODE_OK
+  y_pred:
+  - pass
+  y_true:
+  - pass
+- eval_name: CAPITAL_OK
+  y_pred:
+  - skip
+  y_true:
+  - skip
+raw_data:
+- actual_result: fail
+  eval_actual: 'Manual: fail'
+  eval_expected: Manual evaluation
+  eval_name: NAME_OK
+  expected: pass
+  matches_expected: false
+  metadata:
+    reason: Manual evaluation
+  model: gemini-1.5-flash
+  provider: gemini
+  response_file: 20250529_020903_115049a2_gemini.yml
+  response_name: null
+  score: 0.0
+  timestamp: '2025-05-29T02:09:03.071892'
+- actual_result: pass
+  eval_actual: 'Manual: pass'
+  eval_expected: Manual evaluation
+  eval_name: CODE_OK
+  expected: pass
+  matches_expected: true
+  metadata:
+    reason: Manual evaluation
+  model: gemini-1.5-flash
+  provider: gemini
+  response_file: 20250529_020903_115049a2_gemini.yml
+  response_name: null
+  score: 1.0
+  timestamp: '2025-05-29T02:09:03.071892'
+- actual_result: skip
+  eval_actual: 'Manual: skip'
+  eval_expected: Manual evaluation
+  eval_name: CAPITAL_OK
+  expected: skip
+  matches_expected: true
+  metadata:
+    reason: Manual evaluation
+  model: gemini-1.5-flash
+  provider: gemini
+  response_file: 20250529_020903_115049a2_gemini.yml
+  response_name: null
+  score: 0.0
+  timestamp: '2025-05-29T02:09:03.071892'
+summary:
+  pass_rate: 0.6666666666666666
+  timestamp: '2025-05-29T03:19:52.817241'
+  total_evaluations: 3
+  total_failed: 1
+  total_passed: 2

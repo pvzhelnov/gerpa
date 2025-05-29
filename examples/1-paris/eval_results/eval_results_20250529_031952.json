@@ -1,0 +1,127 @@
+{
+  "summary": {
+    "total_evaluations": 3,
+    "total_passed": 2,
+    "total_failed": 1,
+    "pass_rate": 0.6666666666666666,
+    "timestamp": "2025-05-29T03:19:52.817241"
+  },
+  "by_evaluator": {
+    "CAPITAL_OK": {
+      "matches_expected_count": 1.0,
+      "matches_expected_sum": 1.0,
+      "matches_expected_mean": 1.0,
+      "score_mean": 0.0
+    },
+    "CODE_OK": {
+      "matches_expected_count": 1.0,
+      "matches_expected_sum": 1.0,
+      "matches_expected_mean": 1.0,
+      "score_mean": 1.0
+    },
+    "NAME_OK": {
+      "matches_expected_count": 1.0,
+      "matches_expected_sum": 0.0,
+      "matches_expected_mean": 0.0,
+      "score_mean": 0.0
+    }
+  },
+  "by_provider": {
+    "gemini": {
+      "matches_expected_count": 3.0,
+      "matches_expected_sum": 2.0,
+      "matches_expected_mean": 0.667,
+      "score_mean": 0.333
+    }
+  },
+  "by_model": {
+    "gemini-1.5-flash": {
+      "matches_expected_count": 3.0,
+      "matches_expected_sum": 2.0,
+      "matches_expected_mean": 0.667,
+      "score_mean": 0.333
+    }
+  },
+  "raw_data": [
+    {
+      "response_file": "20250529_020903_115049a2_gemini.yml",
+      "response_name": null,
+      "provider": "gemini",
+      "model": "gemini-1.5-flash",
+      "timestamp": "2025-05-29T02:09:03.071892",
+      "eval_name": "NAME_OK",
+      "expected": "pass",
+      "actual_result": "fail",
+      "matches_expected": false,
+      "score": 0.0,
+      "eval_expected": "Manual evaluation",
+      "eval_actual": "Manual: fail",
+      "metadata": {
+        "reason": "Manual evaluation"
+      }
+    },
+    {
+      "response_file": "20250529_020903_115049a2_gemini.yml",
+      "response_name": null,
+      "provider": "gemini",
+      "model": "gemini-1.5-flash",
+      "timestamp": "2025-05-29T02:09:03.071892",
+      "eval_name": "CODE_OK",
+      "expected": "pass",
+      "actual_result": "pass",
+      "matches_expected": true,
+      "score": 1.0,
+      "eval_expected": "Manual evaluation",
+      "eval_actual": "Manual: pass",
+      "metadata": {
+        "reason": "Manual evaluation"
+      }
+    },
+    {
+      "response_file": "20250529_020903_115049a2_gemini.yml",
+      "response_name": null,
+      "provider": "gemini",
+      "model": "gemini-1.5-flash",
+      "timestamp": "2025-05-29T02:09:03.071892",
+      "eval_name": "CAPITAL_OK",
+      "expected": "skip",
+      "actual_result": "skip",
+      "matches_expected": true,
+      "score": 0.0,
+      "eval_expected": "Manual evaluation",
+      "eval_actual": "Manual: skip",
+      "metadata": {
+        "reason": "Manual evaluation"
+      }
+    }
+  ],
+  "confusion_data": [
+    {
+      "eval_name": "NAME_OK",
+      "y_true": [
+        "pass"
+      ],
+      "y_pred": [
+        "fail"
+      ]
+    },
+    {
+      "eval_name": "CODE_OK",
+      "y_true": [
+        "pass"
+      ],
+      "y_pred": [
+        "pass"
+      ]
+    },
+    {
+      "eval_name": "CAPITAL_OK",
+      "y_true": [
+        "skip"
+      ],
+      "y_pred": [
+        "skip"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+content:
+  country:
+    official_name: French Republic
+    iso_3166_2_code: FR
+  capital: Paris
+model: gemini-1.5-flash
+provider: gemini
+timestamp: '2025-05-29T02:09:03.071892'
+token_usage:
+  prompt_tokens: 227
+  completion_tokens: 33
+  total_tokens: 260
+metadata:
+  finish_reason: completed
+prompt_hash: 115049a2
+prompt_file: prompts/115049a2.txt
+response_schema: Geography
+ground_truth:
+  country:
+    official_name: The French Republic
+    iso_3166_2_code: FR
+  capital: Paris
+evals: {}
+manual_evals:
+  NAME_OK: fail
+  CODE_OK: pass
+  CAPITAL_OK: skip
+name: null
