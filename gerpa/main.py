@@ -227,7 +227,7 @@ from google.genai.types import Tool, GenerateContentConfig, GoogleSearch
 
 class LLMResponse(BaseModel):
     """Standard response format for all LLM providers"""
-    content: str
+    content: BaseModel = None
     model: str
     provider: str
     timestamp: datetime
@@ -276,7 +276,7 @@ class GeminiProvider(BaseLLMProvider):
             )
             
             return LLMResponse(
-                content=response.text,
+                content=response_schema.model_validate_json(response.text),
                 model=self.model,
                 provider="gemini",
                 timestamp=datetime.now(),
@@ -448,11 +448,13 @@ class LLMAgent:
             
             # Generate response
             response = self.provider.generate(prompt, self.response_schema)
+
+            json_response = response.content.model_dump_json()
             
             # Log the interaction
             log_data = {
                 "prompt_hash": prompt_hash,
-                "response_content": response.content[:200] + "..." if len(response.content) > 200 else response.content,
+                "response_content": json_response[:200] + "..." if len(json_response) > 200 else json_response,
                 "model": response.model,
                 "provider": response.provider,
                 "token_usage": response.token_usage,
@@ -492,7 +494,7 @@ class LLMAgent:
         response_file = responses_dir / f"{timestamp_str}_{prompt_hash}_{response.provider}.yaml"
         
         response_data = {
-            "content": response.content,
+            "content": response.content.model_dump(),  # to dict
             "model": response.model,
             "provider": response.provider,
             "timestamp": response.timestamp.isoformat(),
