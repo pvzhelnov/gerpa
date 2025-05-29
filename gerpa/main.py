@@ -172,6 +172,7 @@ Temporary Items
 .apdisk
 
 # Project specific
+untracked
 logs/
 responses/
 *.env
@@ -182,24 +183,24 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.11.9
-  - pip=24.0
+  - python=3.12.9
+  - pip=25.1
   - pip:
-    - click==8.1.7
-    - pydantic==2.7.1
-    - python-dotenv==1.0.1
-    - pyyaml==6.0.1
-    - requests==2.31.0
-    - openai==1.30.1
-    - google-generativeai==0.5.4
-    - ollama==0.2.1
-    - pandas==2.2.2
-    - numpy==1.26.4
-    - matplotlib==3.8.4
+    - click==8.2.1
+    - pydantic==2.11.5
+    - python-dotenv==1.1.0
+    - pyyaml==6.0.2
+    - requests==2.32.
+    - openai==1.82.0
+    - google-genai==1.17.0
+    - ollama==0.4.9
+    - pandas==2.2.3
+    - numpy==2.2.6
+    - matplotlib==3.10.3
     - seaborn==0.13.2
-    - scikit-learn==1.4.2
-    - jupyter==1.0.0
-    - ipykernel==6.29.4
+    - scikit-learn==1.6.1
+    - jupyter==1.1.1
+    - ipykernel==6.29.5
 """
 
 LLMPROVIDER_CODE = '''"""
