@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# Edit this and continue reading
+PROJECT_ROOT="/abs/path/to/gerpa/repo"
+
+PACKAGE_NAME="gerpa"
+MODULE_NAME="main"
+export PYTHONPATH="$PROJECT_ROOT:$PYTHONPATH"
+
+# Now run the module
+python3 -m "${PACKAGE_NAME}.${MODULE_NAME}" "$@"
+
+# To make this executable (macOS):
+# 0. Run: cp ./gerpa.example ./untracked/gerpa
+# 1. Edit PROJECT_ROOT in ./untracked/gerpa
+# 2. Run: chmod +x ./untracked/gerpa
+# 3. Run: sudo cp ./untracked/gerpa /usr/local/bin/gerpa
+# After these, 'gerpa init' works under any directory
