@@ -506,7 +506,7 @@ class LLMAgent:
             "metadata": response.metadata,
             "prompt_hash": prompt_hash,
             "prompt_file": f"prompts/{prompt_hash}.txt",
-            "response_schema": self.response_schema.__name__ if self.response_schema else None,
+            "response_schema": self.response_schema.model_json_schema() if self.response_schema else None,
             "evals": {},
             "ground_truth": None,
             "name": None
