@@ -1098,11 +1098,16 @@ def init(project_name: str, git: bool):
     ]
     for dir_name in directories:
         (project_path / dir_name).mkdir()
+
+    template_lines = CONDA_ENV_TEMPLATE.strip().split('\n')
+    if template_lines and template_lines[0].startswith('name:'):
+        template_lines[0] = f"name: {project_name}"
+    formatted_conda_env_template = '\n'.join(template_lines)
         
     # Create files
     files = {
         '.gitignore': GITIGNORE_TEMPLATE,
-        'environment.yml': CONDA_ENV_TEMPLATE,
+        'environment.yml': formatted_conda_env_template,
         'llm_provider.py': LLMPROVIDER_CODE,
         'evaluator.py': EVALUATOR_CODE,
         'experiment.ipynb': NOTEBOOK_CODE,
@@ -1130,7 +1135,7 @@ def init(project_name: str, git: bool):
     click.echo(f"\nNext steps:")
     click.echo(f"1. cd {project_name}")
     click.echo(f"2. conda env create -f environment.yml")
-    click.echo(f"3. conda activate llm-proto")
+    click.echo(f"3. conda activate {project_name}")
     click.echo(f"4. Copy .env.example to .env and add your API keys")
     click.echo(f"5. jupyter notebook experiment.ipynb")
 
