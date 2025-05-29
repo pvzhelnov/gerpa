@@ -795,6 +795,27 @@ class GroundTruthEvaluator(BaseEvaluator):
             score=score
         )
 
+class ManualEvaluator(BaseEvaluator):
+    """Dynamic manual evaluator that accepts any name and result"""
+    
+    def __init__(self, name: str):
+        super().__init__(name)
+        
+    def evaluate(self, response_content: str, ground_truth: Any = None, **kwargs) -> EvalResult:
+        manual_result = kwargs.get('manual_result', 'skip')
+        manual_score = kwargs.get('manual_score')
+        manual_reason = kwargs.get('manual_reason', 'Manual evaluation')
+        
+        return EvalResult(
+            test_name=self.name,
+            result=manual_result,
+            expected="Manual evaluation",
+            actual=f"Manual: {manual_result}",
+            score=manual_score if manual_score is not None else (1.0 if manual_result == "pass" else 0.0),
+            metadata={"reason": manual_reason}
+        )
+
+
 
 class EvaluationRunner:
     """Main evaluation runner"""
@@ -898,6 +919,32 @@ class EvaluationRunner:
                 })
             else:
                 self.logger.warning(f"Unknown evaluator: {eval_name}")
+
+        # Handle manual evaluations
+        manual_evals = response_data.get('manual_evals', {})
+        for eval_name, manual_result in manual_evals.items():
+            # Skip if already processed in regular evals
+            if eval_name in evals:
+                continue
+                
+            evaluator = ManualEvaluator(eval_name)
+            result = evaluator.evaluate(content, ground_truth, manual_result=manual_result)
+            
+            results.append({
+                'response_file': filename,
+                'response_name': name,
+                'provider': response_data.get('provider'),
+                'model': response_data.get('model'),
+                'timestamp': response_data.get('timestamp'),
+                'eval_name': eval_name,
+                'expected': 'pass' if manual_result != 'skip' else 'skip',
+                'actual_result': result.result,
+                'matches_expected': (result.result == ('pass' if manual_result != 'skip' else 'skip')),
+                'score': result.score,
+                'eval_expected': result.expected,
+                'eval_actual': result.actual,
+                'metadata': result.metadata
+            })
                 
         return results
         
@@ -953,12 +1000,25 @@ class EvaluationRunner:
                 'pass_rate': pass_rate,
                 'timestamp': datetime.now().isoformat()
             },
-            'by_evaluator': by_evaluator.to_dict() if not by_evaluator.empty else {},
-            'by_provider': by_provider.to_dict() if not by_provider.empty else {},
-            'by_model': by_model.to_dict() if not by_model.empty else {},
+            'by_evaluator': self._flatten_multiindex_dict(by_evaluator) if not by_evaluator.empty else {},
+            'by_provider': self._flatten_multiindex_dict(by_provider) if not by_provider.empty else {},
+            'by_model': self._flatten_multiindex_dict(by_model) if not by_model.empty else {},
             'raw_data': df.to_dict('records'),
             'confusion_data': confusion_data
         }
+
+    def _flatten_multiindex_dict(self, df):
+        """Flatten MultiIndex DataFrame to JSON-serializable dict"""
+        result = {}
+        for index, row in df.iterrows():
+            result[str(index)] = {}
+            for col in df.columns:
+                if isinstance(col, tuple):
+                    key = '_'.join(str(x) for x in col)
+                else:
+                    key = str(col)
+                result[str(index)][key] = row[col]
+        return result
         
     def _save_results(self, results: Dict, output_path: Path):
         """Save aggregated results"""
@@ -1029,11 +1089,12 @@ class EvaluationRunner:
             y_true = confusion_info['y_true']
             y_pred = confusion_info['y_pred']
             
-            labels = sorted(list(set(y_true + y_pred)))
-            cm = confusion_matrix(y_true, y_pred, labels=labels)
+            #labels = sorted(list(set(y_true + y_pred)))
+            all_labels = ['pass', 'fail', 'skip']  # Define all possible labels
+            cm = confusion_matrix(y_true, y_pred, labels=all_labels)
             
             sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
-                       xticklabels=labels, yticklabels=labels,
+                       xticklabels=all_labels, yticklabels=all_labels,
                        ax=axes[1, 1])
             axes[1, 1].set_title(f'Confusion Matrix: {confusion_info["eval_name"]}')
             axes[1, 1].set_xlabel('Predicted')
@@ -1051,7 +1112,7 @@ class EvaluationRunner:
         """Print evaluation summary to console"""
         summary = results.get('summary', {})
         
-        print("\n" + "="*60)
+        print("\\n" + "="*60)
         print("EVALUATION SUMMARY")
         print("="*60)
         print(f"Total Evaluations: {summary.get('total_evaluations', 0)}")
@@ -1062,7 +1123,7 @@ class EvaluationRunner:
         
         # By evaluator summary
         if results.get('by_evaluator'):
-            print("\nBY EVALUATOR:")
+            print("\\nBY EVALUATOR:")
             print("-" * 40)
             eval_df = pd.DataFrame(results['by_evaluator']).T
             if not eval_df.empty and 'matches_expected' in eval_df.columns:
