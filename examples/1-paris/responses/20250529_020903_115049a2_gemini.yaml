@@ -14,7 +14,32 @@ metadata:
   finish_reason: completed
 prompt_hash: 115049a2
 prompt_file: prompts/115049a2.txt
-response_schema: Geography
+response_schema:
+  $defs:
+    Country:
+      properties:
+        iso_3166_2_code:
+          title: Iso 3166 2 Code
+          type: string
+        official_name:
+          title: Official Name
+          type: string
+      required:
+      - iso_3166_2_code
+      - official_name
+      title: Country
+      type: object
+  properties:
+    country:
+      $ref: '#/$defs/Country'
+    capital:
+      title: Capital
+      type: string
+  required:
+  - country
+  - capital
+  title: Geography
+  type: object
 ground_truth:
   country:
     official_name: The French Republic
