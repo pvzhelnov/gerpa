@@ -219,10 +219,11 @@ from abc import ABC, abstractmethod
 from pydantic import BaseModel
 
 import requests
-import google.generativeai as genai
+from google import genai
 import ollama
 from openai import OpenAI
 
+from google.genai.types import Tool, GenerateContentConfig, GoogleSearch
 
 class LLMResponse(BaseModel):
     """Standard response format for all LLM providers"""
@@ -255,8 +256,7 @@ class GeminiProvider(BaseLLMProvider):
         api_key = os.getenv("GOOGLE_API_KEY")
         if not api_key:
             raise ValueError("GOOGLE_API_KEY environment variable is required")
-        genai.configure(api_key=api_key)
-        self.client = genai.GenerativeModel(model)
+        self.client = genai.Client(api_key=api_key)
         
     def generate(self, prompt: str, response_schema: Optional[Type[BaseModel]] = None) -> LLMResponse:
         try:
@@ -265,7 +265,15 @@ class GeminiProvider(BaseLLMProvider):
                 schema_instruction = f"\\nRespond with valid JSON matching this schema: {response_schema.model_json_schema()}"
                 prompt = prompt + schema_instruction
                 
-            response = self.client.generate_content(prompt)
+            response = self.client.models.generate_content(
+                model=self.model,
+                contents=[prompt],
+                config=GenerateContentConfig(
+                    temperature=0.8,
+                    response_mime_type='application/json',
+                    response_schema=response_schema
+                )
+            )
             
             return LLMResponse(
                 content=response.text,
