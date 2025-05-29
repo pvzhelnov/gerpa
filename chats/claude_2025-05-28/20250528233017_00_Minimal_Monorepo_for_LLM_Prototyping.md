@@ -2,6 +2,40 @@
 
 *Exported on: 5/28/2025, 11:30:17 PM*
 
+## User
+
+minimal monorepo for fast prototyping. cli interface initiates:
+- new git repo with gitignore for python and macos
+- new minimal conda env yml file with all deps pinned
+- python wrapper for various llm providers - start with gemini, openrouter and local inference (start with ollama) but must be extensible further, which exposes a minimal sdk by importing which i can do,
+class SomeResponseSchema(Basemodel)
+  ...definition
+LLMPROVIDER = "provider"
+agent = agent(llmprovider, responseschdma)
+prompt = "prompt {stuff}"
+response = agent(prompt)
+logger.info(response)  # includes json, token usage - all logs go into logs/yyyy/mm/dd/script_filename.log
+- empty python notebook to run experiments
+- env is loaded from dotenv and gitignored
+- prompts must be versioned
+- responses must be saved to responses as yaml files with ability to add ground truth and names for custom eval tests which can be pass test, eg
+evals:
+  HAS_NO_SHIT_IN_RESPONSE: fail
+- run evals must be implemented off the shelf, which looks for any eval test values and ground truth available from yaml files, with one command all yaml files are reviewed all data collected, metrics calculated (like confusion matrix or intersection over union) and heatmap printed
+- evals must be implemented to be able to run multiple times, iterate and version them
+- all response yamls also contain inference provider (eg google genai, ollama etc), model name, inference date, link to versioned prompt(s) and versioned pydantic response model
+
+## Claude
+
+I'll create a minimal monorepo for fast LLM prototyping with all the features you requested. This will be a comprehensive CLI tool that sets up everything you need.
+
+**Code Artifact:** `01_LLM Prototyping Monorepo CLI` (Code ∙ Version 1)
+*See separate file with corresponding timestamp prefix*
+
+## User
+
+continue artifact exactly where you left. dont rewrite anything
+
 ## Claude
 
 Perfect! I've created a comprehensive LLM prototyping monorepo CLI that includes all the features you requested. Here's what it provides:
@@ -51,7 +85,7 @@ ground_truth: "Expected answer here"
 The system is designed for rapid iteration - you can quickly test different providers, version your prompts, and systematically evaluate results with minimal boilerplate code.
 
 
-**Code Artifact:** `01_LLM Prototyping Monorepo CLI` (Code ∙ Version 2)
+**Code Artifact:** `02_LLM Prototyping Monorepo CLI` (Code ∙ Version 2)
 *See separate file with corresponding timestamp prefix*
 
 
