@@ -1,3 +1,4 @@
+```yaml
 name: gerpa
 channels:
   - conda-forge
@@ -6,4 +7,5 @@ dependencies:
   - python=3.12.9
   - pip=25.1
   - pip:
-    - -r requirements.txt
+    - poetry==2.1.3
+```
