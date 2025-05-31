@@ -1,6 +1,19 @@
 ```bash
 #!/bin/sh
 
+# Notice: This package is experimental and not recommended
+# for system-wide installation. Therefore, please follow
+# the below instructions to make use of it once you have
+# cloned the repository from GitHub.
+
+# This file serves both as the README file and as a script
+# template which makes GERPA usable as a portable CLI app.
+
+# First, install dependencies and set up environment / packaging.
+# Usage: You may use Makefile for the poetry / conda set-up
+# (this is a versatile and recommended way). Alternatively, you may
+# opt to simply go with the usual: pip install -r requirements.txt
+
 # Edit this and continue reading
 PROJECT_ROOT="/abs/path/to/gerpa/repo"
 
