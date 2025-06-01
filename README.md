@@ -14,12 +14,14 @@
 # (this is a versatile and recommended way). Alternatively, you may
 # opt to simply go with the usual: pip install -r requirements.txt
 
-# Edit this and continue reading
+# Edit the following line and continue reading
 PROJECT_ROOT="/abs/path/to/gerpa/repo"
 
-PACKAGE_NAME="gerpa"
-MODULE_NAME="main"
+# Run these commands to locate Python
+PACKAGE_NAME="gerpa" && MODULE_NAME="main"
 export PYTHONPATH="$PROJECT_ROOT:$PYTHONPATH"
+# Uncomment the following line if you went with a conda set-up
+#eval "$(conda shell.bash hook)" && conda activate gerpa
 
 # Now run the module
 python3 -m "${PACKAGE_NAME}.${MODULE_NAME}" "$@"
