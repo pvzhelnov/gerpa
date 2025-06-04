@@ -1,5 +1,5 @@
 ```bash
-#!/bin/sh
+#!/bin/bash
 
 # Notice: This package is experimental and not recommended
 # for system-wide installation. Therefore, please follow
@@ -26,7 +26,7 @@ export PYTHONPATH="$PROJECT_ROOT:$PYTHONPATH"
 # Now run the module
 python3 -m "${PACKAGE_NAME}.${MODULE_NAME}" "$@"
 
-# Install the 'gerpa' command (macOS / Linux / WSL2):
+# Install the 'gerpa' command (macOS / Linux / WSL2)
 # (this will be available for the current user only;
 #  no root or administrator access is needed):
 # 0. Ensure the 'untracked' directory exists:
