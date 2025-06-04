@@ -256,7 +256,7 @@ class LLMAgent:
                 "token_usage": response.token_usage,
                 "timestamp": response.timestamp.isoformat()
             }
-            self.logger.info(f"LLM Response: {json.dumps(log_data, indent=2)}")
+            self.logger.info(f"LLM Response: {json.dumps(log_data, indent=2, ensure_ascii=False)}")
             
             # Save response if requested
             if save_response:
@@ -305,7 +305,7 @@ class LLMAgent:
         }
         
         with open(response_file, 'w') as f:
-            yaml.dump(response_data, f, default_flow_style=False, sort_keys=False)
+            yaml.dump(response_data, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
 
 
 def agent(provider: str, response_schema: Optional[Type[BaseModel]] = None, **kwargs) -> LLMAgent:
