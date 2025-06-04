@@ -10,7 +10,7 @@ import hashlib
 import logging
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, Any, Optional, Type, Union
+from typing import Dict, Any, Optional, Type, Union, List
 from abc import ABC, abstractmethod, ABCMeta
 from pydantic import BaseModel
 
@@ -53,7 +53,7 @@ class BaseLLMProvider(ABC):
         self.provider_name = self.__class__.__name__.lower().replace('provider', '')
         
     @abstractmethod
-    def generate(self, prompt: str, response_schema: Optional[Type[BaseModel]] = None) -> LLMResponse:
+    def generate(self, prompt: Union[str, List[str]], response_schema: Optional[Type[BaseModel]] = None) -> LLMResponse:
         """Generate response from the LLM"""
         pass
 
@@ -68,16 +68,32 @@ class GeminiProvider(BaseLLMProvider):
             raise ValueError("GOOGLE_API_KEY environment variable is required")
         self.client = genai.Client(api_key=api_key)
         
-    def generate(self, prompt: str, response_schema: Optional[Type[BaseModel]] = None) -> LLMResponse:
+    def generate(self, prompt: Union[str, List[str]], response_schema: Optional[Type[BaseModel]] = None) -> LLMResponse:
         try:
+            # Handle both string and list inputs
+            if isinstance(prompt, str):
+                prompt_parts = [prompt]
+            else:
+                prompt_parts = prompt
+                
+            contents = []
+
+            # Process each item in the prompt
+            for item in prompt_parts:
+                if self._is_valid_path_or_url(item):
+                    uploaded_file = self._upload_file(item)
+                    contents.append(uploaded_file)
+                else:
+                    contents.append(item)
+            
+            # Add schema instruction as separate item if response_schema is specified
             if response_schema:
-                # Add JSON schema instruction to prompt
-                schema_instruction = f"\nRespond with valid JSON matching this schema: {response_schema.model_json_schema()}"
-                prompt = prompt + schema_instruction
+                schema_instruction = f"Respond with valid JSON matching this schema: {response_schema.model_json_schema()}"
+                contents.append(schema_instruction)
                 
             response = self.client.models.generate_content(
                 model=self.model,
-                contents=[prompt],
+                contents=contents,
                 config=GenerateContentConfig(
                     temperature=0.8,
                     response_mime_type='application/json',
@@ -99,6 +115,39 @@ class GeminiProvider(BaseLLMProvider):
             )
         except Exception as e:
             raise RuntimeError(f"Gemini API error: {str(e)}")
+        
+    def _is_valid_path_or_url(self, prompt_part: str) -> bool:
+        """Check if prompt is a valid local path or accessible URL"""
+        # Check if it's a local file path
+        if Path(prompt_part.strip()).exists():
+            return True
+        
+        # Check if it's a URL
+        if prompt_part.strip().startswith(('http://', 'https://')):
+            try:
+                response = requests.head(prompt_part.strip(), timeout=5)
+                return response.status_code == 200
+            except:
+                return False
+        
+        return False
+
+    def _upload_file(self, path_or_url: str):
+        """Upload file to Gemini"""
+        if path_or_url.startswith(('http://', 'https://')):
+            # For URLs, download first then upload
+            response = requests.get(path_or_url)
+            temp_file = f"/tmp/{Path(path_or_url).name}"
+            with open(temp_file, 'wb') as f:
+                f.write(response.content)
+            uploaded_file = self.client.files.upload(file=temp_file)
+            os.remove(temp_file)
+            return uploaded_file
+        else:
+            # For local files
+            return self.client.files.upload(file=path_or_url.strip())
+
+
 class OpenRouterProvider(BaseLLMProvider, metaclass=NotReadyMeta):
     """OpenRouter provider"""
     
@@ -248,7 +297,7 @@ class LLMAgent:
         
         return logger
         
-    def __call__(self, prompt: str, save_response: bool = True) -> LLMResponse:
+    def __call__(self, prompt: Union[str, List[str]], save_response: bool = True) -> LLMResponse:
         """Generate response from LLM"""
         try:
             # Version the prompt
@@ -280,16 +329,23 @@ class LLMAgent:
             self.logger.error(f"Error generating response: {str(e)}")
             raise
             
-    def _version_prompt(self, prompt: str) -> str:
+    def _version_prompt(self, prompt: Optional[Union[str, List[str]]]) -> str:
         """Version a prompt and save it"""
-        prompt_hash = hashlib.sha256(prompt.encode()).hexdigest()[:8]
+
+        if prompt is None:
+            return
+
+        # Stringify if List[str] before hashing
+        stringified_prompt = str(prompt)
+
+        prompt_hash = hashlib.sha256(stringified_prompt.encode()).hexdigest()[:8]
         
         prompts_dir = Path("prompts")
         prompts_dir.mkdir(exist_ok=True)
         
         prompt_file = prompts_dir / f"{prompt_hash}.txt"
         if not prompt_file.exists():
-            prompt_file.write_text(prompt)
+            prompt_file.write_text(stringified_prompt)
             
         return prompt_hash
         
