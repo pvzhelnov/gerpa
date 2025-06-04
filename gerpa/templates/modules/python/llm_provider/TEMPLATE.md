@@ -377,7 +377,7 @@ class LLMAgent:
             yaml.dump(response_data, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
 
 
-def agent(provider: str, response_schema: Optional[Type[BaseModel]] = None, **kwargs) -> LLMAgent:
+def agent(provider: str, response_schema: Type[BaseModel], **kwargs) -> LLMAgent:
     """Factory function to create LLM agent"""
     return LLMAgent(provider=provider, response_schema=response_schema, **kwargs)
 ```
