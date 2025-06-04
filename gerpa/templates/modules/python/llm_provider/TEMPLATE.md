@@ -11,7 +11,7 @@ import logging
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, Any, Optional, Type, Union
-from abc import ABC, abstractmethod
+from abc import ABC, abstractmethod, ABCMeta
 from pydantic import BaseModel
 
 import requests
@@ -20,6 +20,20 @@ import ollama
 from openai import OpenAI
 
 from google.genai.types import Tool, GenerateContentConfig, GoogleSearch
+
+class NotReadyMeta(ABCMeta):
+    def __new__(mcs, name, bases, dct):
+        for attr_name, attr_value in dct.items():
+            mask = ((not attr_name.startswith('__')) or (attr_name == '__init__'))
+            if callable(attr_value) and mask:
+                dct[attr_name] = NotReadyMeta.raise_not_implemented_wrapper(attr_value)
+        return super().__new__(mcs, name, bases, dct)
+
+    @staticmethod
+    def raise_not_implemented_wrapper(func):
+        def wrapper(*args, **kwargs):
+            raise NotImplementedError(f"Class '{args[0].__class__.__name__}' is not ready for use yet. Method '{func.__name__}' is not implemented.")
+        return wrapper
 
 class LLMResponse(BaseModel):
     """Standard response format for all LLM providers"""
@@ -85,9 +99,7 @@ class GeminiProvider(BaseLLMProvider):
             )
         except Exception as e:
             raise RuntimeError(f"Gemini API error: {str(e)}")
-
-
-class OpenRouterProvider(BaseLLMProvider):
+class OpenRouterProvider(BaseLLMProvider, metaclass=NotReadyMeta):
     """OpenRouter provider"""
     
     def __init__(self, model: str = "anthropic/claude-3.5-sonnet", **kwargs):
@@ -130,7 +142,7 @@ class OpenRouterProvider(BaseLLMProvider):
             raise RuntimeError(f"OpenRouter API error: {str(e)}")
 
 
-class OllamaProvider(BaseLLMProvider):
+class OllamaProvider(BaseLLMProvider, metaclass=NotReadyMeta):
     """Ollama local provider"""
     
     def __init__(self, model: str = "llama3.1", host: str = "http://localhost:11434", **kwargs):
