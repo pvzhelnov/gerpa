@@ -365,7 +365,7 @@ class LLMAgent:
         response_file = responses_dir / f"{timestamp_str}_{prompt_hash}_{response.provider}.yml"
         
         response_data = {
-            "content": response.content.model_dump(),  # to dict
+            "content": response.content.model_dump(mode='json'),  # to json - dict is hard to load for evals!
             "model": response.model,
             "provider": response.provider,
             "timestamp": response.timestamp.isoformat(),
