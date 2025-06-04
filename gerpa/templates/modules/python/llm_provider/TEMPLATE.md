@@ -98,6 +98,7 @@ class GeminiProvider(BaseLLMProvider):
                     temperature=0.8,
                     response_mime_type='application/json',
                     response_schema=response_schema
+                    #response_json_schema=response_schema.model_json_schema()  # not implemented
                 )
             )
             
