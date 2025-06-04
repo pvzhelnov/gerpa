@@ -38,9 +38,19 @@ python3 -m "${PACKAGE_NAME}.${MODULE_NAME}" "$@"
 #    cp ./untracked/gerpa "$HOME/.local/bin/gerpa"
 # 4. Make the script executable:
 #    chmod +x "$HOME/.local/bin/gerpa"
-# 5. Make sure ~/.local/bin is in your PATH if it's not already there
-#    (e.g., ~/.bashrc, ~/.zshrc, or ~/.profile - depending on your shell and OS):
-#    for f in ~/.bashrc ~/.zshrc ~/.profile; do [ -f "$f" ] && grep -qxF 'export PATH="$HOME/.local/bin:$PATH"' "$f" || echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$f"; done
+# 5. Create an alias to make the command available globally:
+#    echo 'alias gerpa="$HOME/.local/bin/gerpa"' >> ~/.bashrc
+#    # For zsh users: echo 'alias gerpa="$HOME/.local/bin/gerpa"' >> ~/.zshrc
+#    # For fish users: echo 'alias gerpa="$HOME/.local/bin/gerpa"' >> ~/.config/fish/config.fish
 # 6. Reload your shell config:
-#    source ~/.bashrc  # or 'source ~/.zshrc' or restart your terminal
+#    source ~/.bashrc  # or 'source ~/.zshrc' for zsh
+#    # or restart your terminal
+#    # For fish: No manual reload needed (fish automatically sources config.fish)
+# 7. To uninstall when necessary:
+#    rm "$HOME/.local/bin/gerpa"
+#    # Remove the alias from your shell config:
+#    # For bash: sed -i '/alias gerpa=/d' ~/.bashrc
+#    # For zsh: sed -i '/alias gerpa=/d' ~/.zshrc  
+#    # For fish: sed -i '/alias gerpa=/d' ~/.config/fish/config.fish
+#    # Then reload: source ~/.bashrc (or restart terminal)
 ```
