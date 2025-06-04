@@ -47,7 +47,7 @@ class BaseLLMProvider(ABC):
 class GeminiProvider(BaseLLMProvider):
     """Google Gemini provider"""
     
-    def __init__(self, model: str = "gemini-1.5-flash", **kwargs):
+    def __init__(self, model: str = "gemini-2.0-flash", **kwargs):
         super().__init__(model, **kwargs)
         api_key = os.getenv("GOOGLE_API_KEY")
         if not api_key:
