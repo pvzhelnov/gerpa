@@ -164,14 +164,16 @@ class ManualEvaluator(BaseEvaluator):
     def evaluate(self, response_content: str, ground_truth: Any = None, **kwargs) -> EvalResult:
         manual_result = kwargs.get('manual_result', 'skip')
         manual_score = kwargs.get('manual_score')
+        if manual_score is None:
+            manual_score = 1.0 if manual_result == "pass" else 0.0
         manual_reason = kwargs.get('manual_reason', 'Manual evaluation')
         
         return EvalResult(
             test_name=self.name,
             result=manual_result,
-            expected="Manual evaluation",
-            actual=f"Manual: {manual_result}",
-            score=manual_score if manual_score is not None else (1.0 if manual_result == "pass" else 0.0),
+            expected="Manual evaluation: pass (score > 0)",
+            actual=f"Manual evaluation: {manual_result} (score: {manual_score})",
+            score=manual_score,
             metadata={"reason": manual_reason}
         )
 
@@ -282,29 +284,62 @@ class EvaluationRunner:
 
         # Handle manual evaluations
         manual_evals = response_data.get('manual_evals', {})
-        for eval_name, manual_result in manual_evals.items():
-            # Skip if already processed in regular evals
-            if eval_name in evals:
-                continue
-                
-            evaluator = ManualEvaluator(eval_name)
-            result = evaluator.evaluate(content, ground_truth, manual_result=manual_result)
-            
-            results.append({
-                'response_file': filename,
-                'response_name': name,
-                'provider': response_data.get('provider'),
-                'model': response_data.get('model'),
-                'timestamp': response_data.get('timestamp'),
-                'eval_name': eval_name,
-                'expected': 'pass' if manual_result != 'skip' else 'skip',
-                'actual_result': result.result,
-                'matches_expected': (result.result == ('pass' if manual_result != 'skip' else 'skip')),
-                'score': result.score,
-                'eval_expected': result.expected,
-                'eval_actual': result.actual,
-                'metadata': result.metadata
-            })
+
+        def process_nested_evals(data, parent_key=''):
+            results = []
+            if isinstance(data, dict):
+                for key, value in data.items():
+                    current_key = f"{parent_key}.{key}" if parent_key else key
+
+                    # Placeholder dict to be filled
+                    manual_dict = {
+                        'manual_reason': None,
+                        'manual_result': None,
+                        'manual_score': None
+                    }
+
+                    # Discriminate between dicts
+                    if isinstance(value, dict):
+                        if any(key in value.keys() for key in manual_dict.keys()):
+                            for key in manual_dict.keys():
+                                if key in value:
+                                    manual_dict[key] = value[key]
+                        else:
+                            results.extend(process_nested_evals(value, current_key))
+                            continue
+                    else:
+                        manual_dict['manual_result'] = value
+
+                    # Skip if already processed in regular evals
+                    if current_key in evals:
+                        continue
+                        
+                    evaluator = ManualEvaluator(current_key)
+                    result = evaluator.evaluate(content, ground_truth, **manual_dict)
+                    matches_expected = (
+                        result.result == ('pass' if value != 'skip' else 'skip')
+                    ) and (
+                        (result.score > 0) if value != 'skip' else True
+                    )
+                    
+                    results.append({
+                        'response_file': filename,
+                        'response_name': name,
+                        'provider': response_data.get('provider'),
+                        'model': response_data.get('model'),
+                        'timestamp': response_data.get('timestamp'),
+                        'eval_name': current_key,
+                        'expected': 'pass' if value != 'skip' else 'skip',
+                        'actual_result': result.result,
+                        'matches_expected': matches_expected,
+                        'score': result.score,
+                        'eval_expected': result.expected,
+                        'eval_actual': result.actual,
+                        'metadata': result.metadata
+                    })
+            return results
+
+        results.extend(process_nested_evals(manual_evals))
                 
         return results
         
