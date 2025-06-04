@@ -38,8 +38,6 @@ class NotReadyMeta(ABCMeta):
 class LLMResponse(BaseModel):
     """Standard response format for all LLM providers"""
     content: BaseModel = None
-    model: str
-    provider: str
     timestamp: datetime
     token_usage: Optional[Dict[str, int]] = None
     metadata: Dict[str, Any] = {}
@@ -106,8 +104,6 @@ class GeminiProvider(BaseLLMProvider):
             
             return LLMResponse(
                 content=response_schema.model_validate_json(response.text),
-                model=self.model,
-                provider="gemini",
                 timestamp=datetime.now(),
                 token_usage={
                     "prompt_tokens": response.usage_metadata.prompt_token_count if hasattr(response, 'usage_metadata') else 0,
@@ -319,8 +315,8 @@ class LLMAgent:
                 "prompt_hash": prompt_hash,
                 "system_instruction_hash": system_instruction_hash,
                 "response_content": json_response[:200] + "..." if len(json_response) > 200 else json_response,
-                "model": response.model,
-                "provider": response.provider,
+                "model": self.provider.model,
+                "provider": self.provider.provider_name,
                 "token_usage": response.token_usage,
                 "timestamp": response.timestamp.isoformat()
             }
@@ -362,12 +358,12 @@ class LLMAgent:
         responses_dir.mkdir(exist_ok=True)
         
         timestamp_str = response.timestamp.strftime("%Y%m%d_%H%M%S")
-        response_file = responses_dir / f"{timestamp_str}_{prompt_hash}_{response.provider}.yml"
+        response_file = responses_dir / f"{timestamp_str}_{prompt_hash}_{self.provider.provider_name}.yml"
         
         response_data = {
             "content": response.content.model_dump(mode='json'),  # to json - dict is hard to load for evals!
-            "model": response.model,
-            "provider": response.provider,
+            "model": self.provider.model,
+            "provider": self.provider.provider_name,
             "timestamp": response.timestamp.isoformat(),
             "token_usage": response.token_usage,
             "metadata": response.metadata,
