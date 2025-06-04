@@ -51,6 +51,7 @@ class BaseLLMProvider(ABC):
     def __init__(self, model: str, **kwargs):
         self.model = model
         self.provider_name = self.__class__.__name__.lower().replace('provider', '')
+        self.system_instruction = kwargs.get('system_instruction', None)
         
     @abstractmethod
     def generate(self, prompt: Union[str, List[str]], response_schema: Optional[Type[BaseModel]] = None) -> LLMResponse:
@@ -95,6 +96,7 @@ class GeminiProvider(BaseLLMProvider):
                 model=self.model,
                 contents=contents,
                 config=GenerateContentConfig(
+                    system_instruction=self.system_instruction,
                     temperature=0.8,
                     response_mime_type='application/json',
                     response_schema=response_schema
@@ -303,6 +305,9 @@ class LLMAgent:
         try:
             # Version the prompt
             prompt_hash = self._version_prompt(prompt)
+
+            # Version the system instruction
+            system_instruction_hash = self._version_prompt(self.provider.system_instruction)
             
             # Generate response
             response = self.provider.generate(prompt, self.response_schema)
@@ -312,6 +317,7 @@ class LLMAgent:
             # Log the interaction
             log_data = {
                 "prompt_hash": prompt_hash,
+                "system_instruction_hash": system_instruction_hash,
                 "response_content": json_response[:200] + "..." if len(json_response) > 200 else json_response,
                 "model": response.model,
                 "provider": response.provider,
@@ -322,7 +328,7 @@ class LLMAgent:
             
             # Save response if requested
             if save_response:
-                self._save_response(response, prompt_hash)
+                self._save_response(response, prompt_hash, system_instruction_hash)
                 
             return response
             
@@ -350,7 +356,7 @@ class LLMAgent:
             
         return prompt_hash
         
-    def _save_response(self, response: LLMResponse, prompt_hash: str):
+    def _save_response(self, response: LLMResponse, prompt_hash: str, system_instruction_hash: Optional[str] = None):
         """Save response as YAML file"""
         responses_dir = Path("responses")
         responses_dir.mkdir(exist_ok=True)
@@ -367,6 +373,8 @@ class LLMAgent:
             "metadata": response.metadata,
             "prompt_hash": prompt_hash,
             "prompt_file": f"prompts/{prompt_hash}.txt",
+            "system_instruction_hash": system_instruction_hash,
+            "system_instruction_file": f"prompts/{system_instruction_hash}.txt",
             "response_schema": self.response_schema.model_json_schema() if self.response_schema else None,
             "evals": {},
             "ground_truth": None,
