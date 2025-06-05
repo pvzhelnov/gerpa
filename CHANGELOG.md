@@ -7,180 +7,115 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.0.1] - 2025-06-05
 
+<!--- This section was initially generated with Gemini 2.5 Pro (preview) on 2025-06-06, see chats/2025/06/06/gemini/ --->
+
 ### Added
 
-- Add initial claude chat\
-Did not test anything yet.
+-   Initial project scaffolding including main script, environment configuration (`env.yml`), and `.gitignore`.
 
-- Add gerpa script for global launch\
-Instructions within.
+-   `gerpa` script for global project launch with embedded instructions.
 
-- Add full Paris example with evals\
-From test generated environment.\
-This all seems to work!!
+-   Full "Paris" example demonstrating functionality with integrated evaluations.
 
-- Add chat on file handling implem\
-Testing on test repo yet - not yet integrated in main.\
-As before, had to copy and paste all code chunks from claude.ai manually.
+-   Installation instructions to `README.md`.
 
-- Add gemini chat on meta notimplemented class\
-Still in testing - not migrated to main yet.\
-However, this seems to have been frutiful.
+-   Conda and Poetry configuration files (generated post `make install`).
 
-- Add installation instructions to README
+-   Support for `List[str]` as prompt input, with automatic file uploading (from local path or HTTP URL) to the Gemini API. Unsupported file types will result in an API error.
 
-- Add Conda/Poetry config after Makefile\
-Just ran make install and committing results.
+-   Support for system instructions, passable as `kwargs` to the agent.
 
-- Add support for List[str] as prompt, including files\
-So if a string that looks like a path or HTTP URL is passed, this will now attempt to upload this file to Gemini.\
-Note that unsupported files are not specifially excepted here, so they will just return an API error.
+-   `poetry bump version` command for streamlined version management.
 
-- Add support for system instruction\
-Can be passed to agent as part of kwargs.
+-   Initial `CHANGELOG.md` file, structured according to Keep a Changelog principles.
 
-- Add poetry bump version\
-For easier version bumps.\
-Changelog will follow.
+-   `git-cliff` (v2.9.1) integration for automated changelog generation, initialized with the `keepachangelog` template.
 
-- Add changelog - Unreleased\
-Command to actually generate a changelog:\
-git-cliff -u -o CHANGELOG.md
+-   Project licensed under Apache 2.0.
 
+-   Foundational claude chat integration (initial version).
 
 ### Changed
 
-- Fix initial claude chat export\
-Perhaps the extension is out of date again.\
-There were only two versions in fact, so I removed v3 file.
+-   **[MAJOR]** Core application logic refactored from a monolithic `main` script into a structured system utilizing `Template` and `TemplateType` classes.
 
-- Create main, init, env & upd gitignore\
-Main copied and pasted from chat, just restored missing closing triple single risk on one line.\
-Gitignore - same, copied from chat but left untracked ignore in.\
-Environment - copied initially but then removed all pinned versions and installed latest, then copied pinned versions manually from conda (auto export was very long).
+    -   Evaluator logic and Command Line Interface (CLI) interactions are now fully encapsulated within these templates, eliminating the need for dynamic module imports for evaluators.
 
-- Upd gitignore and env in main\
-Copied and pasted back from this repo's.
+    -   Generated projects are now Poetry-enabled (though `requirements.txt` remains for flexibility and alternative Conda-based setup).
 
-- Fix main code for new google-genai\
-I already fixed the dep in prior commit but only fixing code now.\
-Also, this adds format structured output.
+    -   Redundant import statements in the main script's preamble were removed.
 
-- Hardcode pydantic model in agent response\
-I tested this on a test repo and this works.
+    -   Implemented logic for replacing default parameters within template files during project generation.
 
-- Replace env name with project name in main\
-Replacement code is clumsy but ok for now.
+-   **[MAJOR]** Dependency management migrated to Poetry, complemented by a Makefile for Conda environment setup and Poetry installation. `requirements.txt` has been streamlined to include only essential CLI tool packages, with LLM/data-related packages managed within project templates.
 
-- Fix typo in request patch num in main\
-Fixed in env yml but forgot to copy in main.
+-   **[MAJOR]** OpenRouter and Ollama providers have been retired to `NotImplemented` status, to concentrate development efforts on the Gemini provider.
 
-- Move deps to requirments\
-For easier updates and usability.\
-Changed both in repo and in main.
+-   **[MAJOR]** A response schema is now mandatory for agent interactions to enforce structured output, leveraging this as a key feature for prototyping.
 
-- Fix evaluator loading\
-Did not test yet.\
-Chat export initially automatic but did not include code snippets, so I had to copy and paste them manually.
+-   **[MAJOR]** LLM response dump format changed to JSON (from Pythonic object representation). This simplifies YAML loading for evaluations and enhances log clarity by removing class definitions from the output.
 
-- Test evals and add manual eval\
-Tested on a sample repo and seems to work.
+-   **[MAJOR]** The `model` and `provider` attributes were removed from the `LLMResponse` object, as this information is already available within the agent class instance.
 
-- Replace yaml with yml extensions\
-This is more common afaik.
+-   **[MAJOR]** Evaluation system significantly enhanced:
 
-- Save response schema instead of name\
-Response data now include full schema.\
-I tested this on test repo and it works.
+    -   Nested evaluations are now supported, allowing manual evaluations to mirror the structure of complex response schemas.
 
-- Upd full response schema in paris example\
-To conform with edit from parent commit.
+    -   Manual evaluation logic overhauled: now requires a `pass` status and a score greater than 0 for a "pass" outcome; otherwise, it's marked as "fail" (unless explicitly skipped). The system returns a clear label to the user, indicating the expectation and the resulting score. Manual evaluations can be defined either as a detailed dictionary (with `manual_result`, `manual_score`, `manual_reason`) or as a concise one-liner (`pass` or `fail`, with scores defaulting to 1.0 for pass and 0.0 for fail if not specified).
 
-- License under Apache 2.0
+-   **[MAJOR]** Agent interaction model refined:
 
-- Log chat with manual eval implement\
-Lots copied and pasted manually because no code chunks are captured by extension.
+    -   The `model` argument was renamed to `model_name` for clarity.
 
-- Rework gerpa example to README.md\
-Also added more extensive instructions to make gerpa executable on macOS, linux, or WSL2 under Windows while also removing root access needs.
+    -   Extended `kwargs` support enables more flexible parameter passing from the agent.
 
-- Reorder chats for better structure
+    -   Introduced a `BaseLLM` class providing a minimum configuration baseline and including settings for content safety/censorship.
 
-- Upd gitignore with relevant github/gitignore\
-Makes it a lot more standardized and reliable.\
-For example, the LLM-generated version had poetry.lock ignored by default.
+-   Main script code updated for compatibility with the newer `google-genai` library, including the addition of structured output formatting.
 
-- Migrate to poetry (+ conda + pip requirements)\
-This is to use the good potential of poetry in managing packaging (including poetry.lock for reproducbility).\
-So how this works now is that there is a Makefile with install and uninstall commands:\
-- make install sets a new conda env, installs poetry there, and then adds all packages from requirements.txt and installs them through poetry. - make uninstall removes entire conda env.\
-This set-up makes use of poetry but keeps the local dir nice and clean.\
-The templates for CONDA and POETRY are taken from the new templates dir within package, which will now also be reused by the package.\
-Also, requirements.txt is now lean and only includes packages that are actually used by the CLI tool, and all the LLM/data related packages will remain within REQUIREMENTS template (to be added).
+-   A Pydantic model is now hardcoded in the agent's response mechanism.
 
-- Upd README for conda users
+-   The environment variable name referenced in the main script has been replaced with the project name.
 
-- Refactor Makefile and templates tree\
-Templates will feature their own classes - to be added.
+-   YAML file extensions standardized to `.yml` (from `.yaml`) for common practice.
 
-- [MAJOR] Refactor of main into templates\
-All code chunks moved to their own templates now, with Template and TemplateType classes introduced for more structure.\
-Also, all evaluator logic, including CLI, has been now moved entirely to the template so as to remove the need to import evaluator as module dynamically and deal with deps import. In fact, there is no need to call evals from gerpa.\
-This also makes the generated project poetry enabled - optional because requirements.txt is still in place, and make conda can also be called without calling make poetry\
-I also removed most redundant imports in the preamble of main.\
-There is also some logic now for replacing default params in template files at generation.
+-   Response data now includes the full schema definition, not just the schema name, providing more context.
 
-- Default to gemini-2.0-flash in GeminiProvider\
-Google said it retired 1.5:\
-Model ID | Release date | Retirement date | Recommended upgrade ---|---|---|--- `gemini-1.5-pro-002`* | September 24, 2024 | September 24, 2025 | `gemini-2.0-flash` `gemini-1.5-flash-002`* | September 24, 2024 | September 24, 2025 | `gemini-2.0-flash-lite` `text-embedding-004` | May 14, 2024 | November 18, 2025 | `gemini-embedding-001`\
-https://cloud.google.com/vertex-ai/generative-ai/docs/learn/model-versions#legacy-stable
+-   The "Paris" example's full response schema was updated to align with recent structural changes.
 
-- Allow unicode in yaml dump and logs\
-Why not?
+-   The `gerpa` script example in `README.md` was reworked to include more comprehensive setup and execution instructions for macOS, Linux, and WSL2 (Windows Subsystem for Linux), including guidance on avoiding root access needs.
 
-- [MAJOR] Retire OpenRouter and Ollama providers to NotImplemented\
-Only working on Gemini for now to keep it focused but will come back to these soon.
+-   `.gitignore` file updated using a standard template from `github/gitignore` for improved standardization and reliability (e.g., ensuring `poetry.lock` is not ignored).
 
-- Note not implemented response_json_schema in Gemini config\
-See attached pasted.md for details (closer to the end of the file).
+-   The Makefile and the project template directory structure were refactored for better organization. Templates are now designed to feature their own classes.
 
-- [MAJOR] Mandate response schema for agent\
-I think this is great as forces structured output, and ultimately it is the killer feature for this prototyping package.
+-   The `GeminiProvider` now defaults to using the `gemini-2.0-flash` model, following Google's model lifecycle updates.
 
-- [MAJOR] change response dump format to json\
-This leads to the LLM response being saved (ultimately in the YAML file) as a simple JSON object, not a Pythonic object.\
-It is thus not fully possible to load a Pythonic var after this change - it is, however, simpler to load the YAML for other purposes such as evals, and it looks cleaner because class definitions are absent.\
-This change is not visible with simple schemas such as the one from example 1.
+-   Enabled Unicode character support in YAML dumps and log outputs.
 
-- [MAJOR] Remove model and provider from LLMResponse\
-I figured that they are not needed there because they are part of agent class instance anyway.
+-   Documentation: A note was added indicating that `response_json_schema` is not yet implemented in the Gemini provider configuration.
 
-- Replace PATH rewrite with alias in README\
-For more security - see attached chat.
+-   `README.md` improvements:
 
-- Expand README a bit more for clarity
+    -   Updated with specific instructions for Conda users.
 
-- Fix sh -> bash and colon in README\
-So for bash, it just makes sense because the conda hook works for bash.
+    -   PATH rewrite instructions replaced with an `alias` command for enhanced security.
 
-- [MAJOR] Allow nested evals and change manual eval logic\
-Previously this would throw an exception. Yet nested evals are very helpful to replicate the structure of the response schema in manual evals.\
-In terms of the new manual eval logic, now this expects a pass and a score above zero, otherwise it will put a fail (unless it is a skip), and this now returns a clear label to the user that shows the expectation and the score.\
-Also, it is now possible to either define a dict with explicit manual_result, manual_score, manual_reason or stick to a one-liner pass or fail (score will be set to 1.0 if pass and to 0.0 if fail if not set).
+    -   Expanded with additional details for overall clarity.
 
-- [MAJOR] Change model arg to model_name and add more kwargs\
-This now supports passing any kwargs from agent.\
-Also, there is a BaseLLM now with a minimum config, and there is also settings for safety/censorship.
+-   Internal imports within the `llmprovider` were expanded to allow for more flexible and comfortable modeling.
 
-- Expand imports for llmprovider\
-These allow for more comfortable modeling.
+-   The `git-cliff` template was modified to better parse and categorize the project's specific commit message styles.
 
-- Init git-cliff=2.9.1 with keepachangelog\
-git-cliff --init keepachangelog
+### Fixed
 
-- Modify cliff template to support my commits\
-This seems to work, at least partially.
+-   Corrected a typo in a request patch number within the main script; the fix was previously in `env.yml` but had not been propagated.
 
+-   Resolved an issue with the evaluator loading mechanism.
+
+-   In `README.md` commands, `sh` was corrected to `bash` for Conda hook compatibility, and a missing colon was fixed.
+
+-   Addressed issues in the initial Claude chat export functionality.
+
+[unreleased]: https://github.com/pvzhelnov/gerpa/compare/v0.0.1...HEAD
 [0.0.1]: https://github.com/pvzhelnov/gerpa/releases/tag/v0.0.1
-
-<!-- generated by git-cliff -->
