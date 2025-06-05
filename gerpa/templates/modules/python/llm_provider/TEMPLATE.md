@@ -19,7 +19,7 @@ from google import genai
 import ollama
 from openai import OpenAI
 
-from google.genai.types import Tool, GenerateContentConfig, GoogleSearch
+from google.genai import types
 
 class NotReadyMeta(ABCMeta):
     def __new__(mcs, name, bases, dct):
@@ -34,25 +34,93 @@ class NotReadyMeta(ABCMeta):
         def wrapper(*args, **kwargs):
             raise NotImplementedError(f"Class '{args[0].__class__.__name__}' is not ready for use yet. Method '{func.__name__}' is not implemented.")
         return wrapper
+    
+class BasePrompt(BaseModel):
+    prompt: Optional[Union[str, List[str]]] = None
+    hash: Optional[str] = None
+
+    def __init__(self, *args, **kwargs):
+        if len(args) == 1 and not kwargs:
+            kwargs = {'prompt': args[0]}
+        elif len(args) > 1:
+            raise TypeError("Only one positional argument allowed.")
+        super().__init__(**kwargs)
+        self.hash = self._version_prompt()
+
+    def _version_prompt(self) -> str | None:
+        """Version a prompt and save it"""
+
+        if self.prompt is None:
+            return
+
+        # Stringify if List[str] before hashing
+        stringified_prompt = str(self.prompt)
+
+        prompt_hash = hashlib.sha256(stringified_prompt.encode()).hexdigest()[:8]
+        
+        prompts_dir = Path("prompts")
+        prompts_dir.mkdir(exist_ok=True)
+        
+        prompt_file = prompts_dir / f"{prompt_hash}.txt"
+        if not prompt_file.exists():
+            prompt_file.write_text(stringified_prompt)
+            
+        return prompt_hash
+    
+    def __str__(self):
+        return str(self.prompt or "")
+    
+    def parts(self):
+        if isinstance(self.prompt, list):
+            prompt_parts = self.prompt
+        else:
+            prompt_parts = [str(self.prompt)] if self.prompt else []
+        return prompt_parts
 
 class LLMResponse(BaseModel):
     """Standard response format for all LLM providers"""
     content: BaseModel = None
-    timestamp: datetime
     token_usage: Optional[Dict[str, int]] = None
     metadata: Dict[str, Any] = {}
 
+class BaseResponseSchema(BaseModel):
+    response: str
+
+class BaseLLM(BaseModel):
+    """Base class for all LLMs"""
+    model_name: Optional[str] = None
+    response_schema: Type[BaseModel] = BaseResponseSchema
+    system_instruction: BasePrompt = BasePrompt()
+    temperature: Optional[float] = 0.0
+    top_k: Optional[int] = 40
+    top_p: Optional[float] = 0.95
+    seed: Optional[int] = 42
+    safety_settings: Optional[Any] = None
+
+class GeminiLLM(BaseLLM):
+    model_name: Optional[str] = "gemini-2.0-flash"
 
 class BaseLLMProvider(ABC):
     """Base class for all LLM providers"""
     
-    def __init__(self, model: str, **kwargs):
-        self.model = model
+    def __init__(self, **kwargs):
         self.provider_name = self.__class__.__name__.lower().replace('provider', '')
-        self.system_instruction = kwargs.get('system_instruction', None)
+        llm_type = kwargs.pop('model', BaseLLM)
+        safety_settings = kwargs.pop('safety_settings', self.unsafe_settings())
+        system_instruction = BasePrompt(kwargs.pop('system_instruction', None))
+        self.model: BaseLLM = llm_type(
+            safety_settings=safety_settings,
+            system_instruction=system_instruction,
+            **kwargs
+        )
+
+    @abstractmethod
+    def unsafe_settings(self):
+        """Return provider-specific full uncensored safety settings"""
+        pass
         
     @abstractmethod
-    def generate(self, prompt: Union[str, List[str]], response_schema: Optional[Type[BaseModel]] = None) -> LLMResponse:
+    def generate(self, prompt: BasePrompt, response_schema: Optional[Type[BaseModel]] = None) -> LLMResponse:
         """Generate response from the LLM"""
         pass
 
@@ -60,25 +128,45 @@ class BaseLLMProvider(ABC):
 class GeminiProvider(BaseLLMProvider):
     """Google Gemini provider"""
     
-    def __init__(self, model: str = "gemini-2.0-flash", **kwargs):
-        super().__init__(model, **kwargs)
+    def __init__(self, **kwargs):
         api_key = os.getenv("GOOGLE_API_KEY")
         if not api_key:
             raise ValueError("GOOGLE_API_KEY environment variable is required")
         self.client = genai.Client(api_key=api_key)
+        kwargs.setdefault('model', GeminiLLM)
+        super().__init__(**kwargs)
+
+    def unsafe_settings(self):
+        # https://ai.google.dev/api/generate-content#v1beta.HarmCategory
+        return [
+            types.SafetySetting(
+                category=types.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+                threshold=types.HarmBlockThreshold.BLOCK_NONE,
+            ),
+            types.SafetySetting(
+                category=types.HarmCategory.HARM_CATEGORY_HARASSMENT,
+                threshold=types.HarmBlockThreshold.BLOCK_NONE,
+            ),
+            types.SafetySetting(
+                category=types.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+                threshold=types.HarmBlockThreshold.BLOCK_NONE,
+            ),
+            types.SafetySetting(
+                category=types.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+                threshold=types.HarmBlockThreshold.BLOCK_NONE,
+            ),
+            types.SafetySetting(
+                category=types.HarmCategory.HARM_CATEGORY_CIVIC_INTEGRITY,
+                threshold=types.HarmBlockThreshold.BLOCK_NONE,
+            )
+        ]
         
-    def generate(self, prompt: Union[str, List[str]], response_schema: Optional[Type[BaseModel]] = None) -> LLMResponse:
-        try:
-            # Handle both string and list inputs
-            if isinstance(prompt, str):
-                prompt_parts = [prompt]
-            else:
-                prompt_parts = prompt
-                
+    def generate(self, prompt: BasePrompt) -> LLMResponse:
+        try:                
             contents = []
 
             # Process each item in the prompt
-            for item in prompt_parts:
+            for item in prompt.parts():
                 if self._is_valid_path_or_url(item):
                     uploaded_file = self._upload_file(item)
                     contents.append(uploaded_file)
@@ -86,16 +174,22 @@ class GeminiProvider(BaseLLMProvider):
                     contents.append(item)
             
             # Add schema instruction as separate item if response_schema is specified
+            response_schema = self.model.response_schema
             if response_schema:
                 schema_instruction = f"Respond with valid JSON matching this schema: {response_schema.model_json_schema()}"
                 contents.append(schema_instruction)
                 
+            request_timestamp = datetime.now()
             response = self.client.models.generate_content(
-                model=self.model,
                 contents=contents,
-                config=GenerateContentConfig(
-                    system_instruction=self.system_instruction,
-                    temperature=0.8,
+                model=self.model.model_name,
+                config=types.GenerateContentConfig(
+                    system_instruction=str(self.model.system_instruction),
+                    temperature=self.model.temperature,
+                    top_k=self.model.top_k,
+                    top_p=self.model.top_p,
+                    seed=self.model.seed,
+                    safety_settings=self.model.safety_settings,
                     response_mime_type='application/json',
                     response_schema=response_schema
                     #response_json_schema=response_schema.model_json_schema()  # not implemented
@@ -104,13 +198,16 @@ class GeminiProvider(BaseLLMProvider):
             
             return LLMResponse(
                 content=response_schema.model_validate_json(response.text),
-                timestamp=datetime.now(),
                 token_usage={
                     "prompt_tokens": response.usage_metadata.prompt_token_count if hasattr(response, 'usage_metadata') else 0,
                     "completion_tokens": response.usage_metadata.candidates_token_count if hasattr(response, 'usage_metadata') else 0,
                     "total_tokens": response.usage_metadata.total_token_count if hasattr(response, 'usage_metadata') else 0
                 } if hasattr(response, 'usage_metadata') else None,
-                metadata={"finish_reason": "completed"}
+                metadata={
+                    "request_timestamp": request_timestamp.isoformat(),
+                    "response_timestamp": datetime.now().isoformat(),
+                    "finish_reason": "completed"
+                }
             )
         except Exception as e:
             raise RuntimeError(f"Gemini API error: {str(e)}")
@@ -234,25 +331,21 @@ class OllamaProvider(BaseLLMProvider, metaclass=NotReadyMeta):
 class LLMAgent:
     """Main agent class for LLM interactions"""
     
-    def __init__(self, provider: str, model: str = None, response_schema: Optional[Type[BaseModel]] = None, **kwargs):
-        self.response_schema = response_schema
+    def __init__(self, provider_name: str, **kwargs):
         self.logger = self._setup_logger()
         
         # Provider mapping
-        providers = {
+        providers: dict[str, BaseLLMProvider] = {
             "gemini": GeminiProvider,
             "openrouter": OpenRouterProvider,
             "ollama": OllamaProvider
         }
         
-        if provider not in providers:
-            raise ValueError(f"Unsupported provider: {provider}. Supported: {list(providers.keys())}")
+        if provider_name not in providers:
+            raise ValueError(f"Unsupported provider: {provider_name}. Supported: {list(providers.keys())}")
             
-        provider_class = providers[provider]
-        if model:
-            self.provider = provider_class(model=model, **kwargs)
-        else:
-            self.provider = provider_class(**kwargs)
+        provider_class = providers[provider_name]
+        self.provider: BaseLLMProvider = provider_class(**kwargs)
             
     def _setup_logger(self) -> logging.Logger:
         """Setup logger with date-based file structure"""
@@ -299,32 +392,44 @@ class LLMAgent:
     def __call__(self, prompt: Union[str, List[str]], save_response: bool = True) -> LLMResponse:
         """Generate response from LLM"""
         try:
-            # Version the prompt
-            prompt_hash = self._version_prompt(prompt)
+            hashed_prompt = BasePrompt(prompt)
 
-            # Version the system instruction
-            system_instruction_hash = self._version_prompt(self.provider.system_instruction)
-            
             # Generate response
-            response = self.provider.generate(prompt, self.response_schema)
+            response = self.provider.generate(hashed_prompt)
 
             json_response = response.content.model_dump_json()
             
             # Log the interaction
             log_data = {
-                "prompt_hash": prompt_hash,
-                "system_instruction_hash": system_instruction_hash,
-                "response_content": json_response[:200] + "..." if len(json_response) > 200 else json_response,
-                "model": self.provider.model,
-                "provider": self.provider.provider_name,
-                "token_usage": response.token_usage,
-                "timestamp": response.timestamp.isoformat()
+                "provider": {
+                    "provider_name": self.provider.provider_name,
+                    "safety_settings": str(self.provider.model.safety_settings)
+                },
+                "model": {
+                    "model_name": self.provider.model.model_name,
+                    "config": {
+                        "temperature": self.provider.model.temperature,
+                        "top_k": self.provider.model.top_k,
+                        "top_p": self.provider.model.top_p,
+                        "seed": self.provider.model.seed,
+                    }
+                },
+                "request": {
+                    "prompt_hash": hashed_prompt.hash,
+                    "system_instruction_hash": self.provider.model.system_instruction.hash,
+                    "response_schema": self.provider.model.response_schema.__name__,  # perhaps to be replaced with a hash later on
+                },
+                "response": {
+                    "content": json_response[:200] + "..." if len(json_response) > 200 else json_response,
+                    "token_usage": response.token_usage,
+                    "metadata": response.metadata,
+                }
             }
             self.logger.info(f"LLM Response: {json.dumps(log_data, indent=2, ensure_ascii=False)}")
             
             # Save response if requested
             if save_response:
-                self._save_response(response, prompt_hash, system_instruction_hash)
+                self._save_response(response, hashed_prompt)
                 
             return response
             
@@ -352,27 +457,42 @@ class LLMAgent:
             
         return prompt_hash
         
-    def _save_response(self, response: LLMResponse, prompt_hash: str, system_instruction_hash: Optional[str] = None):
+    def _save_response(self, response: LLMResponse, prompt: BasePrompt):
         """Save response as YAML file"""
         responses_dir = Path("responses")
         responses_dir.mkdir(exist_ok=True)
         
-        timestamp_str = response.timestamp.strftime("%Y%m%d_%H%M%S")
-        response_file = responses_dir / f"{timestamp_str}_{prompt_hash}_{self.provider.provider_name}.yml"
+        timestamp_str = datetime.now().strftime("%Y%m%d_%H%M%S")
+        response_file = responses_dir / f"{timestamp_str}_{prompt.hash}_{self.provider.provider_name}.yml"
         
         response_data = {
-            "content": response.content.model_dump(mode='json'),  # to json - dict is hard to load for evals!
-            "model": self.provider.model,
-            "provider": self.provider.provider_name,
-            "timestamp": response.timestamp.isoformat(),
-            "token_usage": response.token_usage,
-            "metadata": response.metadata,
-            "prompt_hash": prompt_hash,
-            "prompt_file": f"prompts/{prompt_hash}.txt",
-            "system_instruction_hash": system_instruction_hash,
-            "system_instruction_file": f"prompts/{system_instruction_hash}.txt",
-            "response_schema": self.response_schema.model_json_schema() if self.response_schema else None,
+            "provider": {
+                "provider_name": self.provider.provider_name,
+                "safety_settings": str(self.provider.model.safety_settings)
+            },
+            "model": {
+                "model_name": self.provider.model.model_name,
+                "config": {
+                    "temperature": self.provider.model.temperature,
+                    "top_k": self.provider.model.top_k,
+                    "top_p": self.provider.model.top_p,
+                    "seed": self.provider.model.seed,
+                }
+            },
+            "request": {
+                "prompt_hash": prompt.hash,
+                "prompt_file": f"prompts/{prompt.hash}.txt",
+                "system_instruction_hash": self.provider.model.system_instruction.hash,
+                "system_instruction_file": f"prompts/{self.provider.model.system_instruction.hash}.txt",
+                "response_schema": self.provider.model.response_schema.model_json_schema()
+            },
+            "response": {
+                "content": response.content.model_dump(mode='json'),  # to json - dict is hard to load for evals!
+                "token_usage": response.token_usage,
+                "metadata": response.metadata,
+            },
             "evals": {},
+            "manual_evals": {},
             "ground_truth": None,
             "name": None
         }
@@ -383,5 +503,5 @@ class LLMAgent:
 
 def agent(provider: str, response_schema: Type[BaseModel], **kwargs) -> LLMAgent:
     """Factory function to create LLM agent"""
-    return LLMAgent(provider=provider, response_schema=response_schema, **kwargs)
+    return LLMAgent(provider_name=provider, response_schema=response_schema, **kwargs)
 ```
