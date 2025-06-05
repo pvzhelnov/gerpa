@@ -7,11 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.0.1] - 2025-06-05
 
-<!--- This section was initially generated with Gemini 2.5 Pro (preview) on 2025-06-06, see chats/2025/06/06/gemini/ --->
+<!--- This section was initially generated with Gemini 2.5 Pro (preview) on 2025-06-05, see chats/2025/06/05/gemini/ --->
 
 ### Added
 
--   Initial project scaffolding including main script, environment configuration (`env.yml`), and `.gitignore`.
+-   Initial project scaffolding including main script, environment configuration (`environment.yml`), and `.gitignore`.
 
 -   `gerpa` script for global project launch with embedded instructions.
 
@@ -109,7 +109,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
--   Corrected a typo in a request patch number within the main script; the fix was previously in `env.yml` but had not been propagated.
+-   Corrected a typo in a request patch number within the main script; the fix was previously in `environment.yml` but had not been propagated.
 
 -   Resolved an issue with the evaluator loading mechanism.
 
