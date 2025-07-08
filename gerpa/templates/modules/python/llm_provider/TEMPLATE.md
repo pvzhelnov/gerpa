@@ -85,7 +85,7 @@ class LLMResponse(BaseModel):
     metadata: Dict[str, Any] = {}
 
 class BaseResponseSchema(BaseModel):
-    response: str
+    pass
 
 class BaseLLM(BaseModel):
     """Base class for all LLMs"""
