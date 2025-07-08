@@ -199,6 +199,7 @@ class GeminiProvider(BaseLLMProvider):
             
             return LLMResponse(
                 raw_content=response.text,
+                content=response_schema.model_validate_json(response.text.strip().lstrip('```json').lstrip('```').rstrip('```').strip()),
                 token_usage={
                     "prompt_tokens": response.usage_metadata.prompt_token_count if hasattr(response, 'usage_metadata') else 0,
                     "completion_tokens": response.usage_metadata.candidates_token_count if hasattr(response, 'usage_metadata') else 0,
