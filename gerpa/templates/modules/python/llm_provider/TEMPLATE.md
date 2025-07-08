@@ -109,6 +109,17 @@ class BaseLLM(BaseModel):
 class GeminiLLM(BaseLLM):
     model_name: Optional[str] = "gemini-2.0-flash"
 
+class OllamaLLM(BaseLLM):
+    model_name: Optional[str] = "gemma3:27b-it-qat"
+
+    # https://github.com/ollama/ollama/blob/main/docs/modelfile.md#valid-parameters-and-values
+    num_ctx: Optional[int] = 8192  # Ollama default is 2048, but setting to AI studio default
+    top_p: Optional[float] = 0.95  # Ollama and AI studio default is 0.95
+    top_k: Optional[int] = 64  # AI studio doesn't expose this, so using Ollama's default for gemma3:27b-it-qat (29eb0b9aeda3)
+    min_p: Optional[float] = 0.05  # AI studio doesn't expose this, so using Ollama default
+    max_tokens: int = -1  # AI studio doesn't expose this, so using Ollama default: Maximum number of tokens to predict when generating text. (Default: -1, infinite generation)
+    seed: Optional[int] = 42  # AI studio doesn't expose this, so using Ollama default
+
 class BaseLLMProvider(ABC):
     """Base class for all LLM providers"""
     
@@ -311,45 +322,150 @@ class OpenRouterProvider(BaseLLMProvider, metaclass=NotReadyMeta):
             raise RuntimeError(f"OpenRouter API error: {str(e)}")
 
 
-class OllamaProvider(BaseLLMProvider, metaclass=NotReadyMeta):
+class OllamaProvider(BaseLLMProvider):
     """Ollama local provider"""
     
-    def __init__(self, model: str = "llama3.1", host: str = "http://localhost:11434", **kwargs):
-        super().__init__(model, **kwargs)
+    def __init__(self, **kwargs):
+        host = os.getenv("OLLAMA_HOST")
+        if not host:
+            #raise ValueError("OLLAMA_HOST environment variable is required")
+            host = 'http://localhost:11434'
         self.host = host
+        kwargs.setdefault('model', OllamaLLM)
+        super().__init__(**kwargs)
+
+    def unsafe_settings(self):  # not offered for Ollama
+        pass
         
-    def generate(self, prompt: str, response_schema: Optional[Type[BaseModel]] = None) -> LLMResponse:
-        try:
-            if response_schema:
-                # Add JSON schema instruction
-                schema_instruction = f"\nRespond with valid JSON matching this schema: {response_schema.model_json_schema()}"
-                prompt = prompt + schema_instruction
-                
-            response = ollama.generate(
-                model=self.model,
-                prompt=prompt,
-                host=self.host
-            )
+    def generate(self, prompt: BasePrompt) -> LLMResponse:
+        try:    # https://ollama.com/library/gemma3:27b-it-qat
+                # Updated Apr 18, 2025 2:08 AM UTC
+                # gemma3:27b-it-qat
+                # 18GB
+                # 128K
+                # Text, Image
+                # 29eb0b9aeda3
+
+            if len(self.model.system_instruction.parts()) > 0:  # if not empty string
+                messages_openai = [{
+                    "role": "system",
+                    "content": str(self.model.system_instruction)
+                }]
+            else:
+                messages_openai = []
+
+            # Process each item in the prompt
+            for item in prompt.parts():
+                if self._is_valid_path_or_url(item):
+                    messages_openai.append({
+                        "role": "user",
+                        "content": "",
+                        "images": [item]
+                    })
+                else:
+                    messages_openai.append({
+                        "role": "user",
+                        "content": item
+                    })
+
+            options_openai = {  # https://github.com/ollama/ollama/blob/main/docs/modelfile.md#valid-parameters-and-values
+                "num_ctx": self.model.num_ctx,
+                "temperature": self.model.temperature,
+                "top_p": self.model.top_p,
+                "top_k": self.model.top_k,
+                "min_p": self.model.min_p,
+                "num_predict": self.model.max_tokens,
+                "seed": self.model.seed
+            }
             
+            # Add schema instruction as separate item if response_schema is specified
+            response_schema = self.model.response_schema
+            
+            payload_ollama = {
+                "model": self.model.model_name,
+                "options": options_openai,
+                "messages": messages_openai,
+                "format": response_schema.model_json_schema()  # https://ollama.com/blog/structured-outputs
+            }
+
+            if response_schema == BaseResponseSchema:  # not set
+                payload_ollama.pop("format", None)
+            
+            # ollama -v
+            # ollama version is 0.9.2
+            # 834cbf10e21e  ./ollama-darwin.tgz
+
+            request_timestamp = datetime.now()
+            response = ollama.chat(**payload_ollama)
+
+            def postprocess(dump):
+                def nanoseconds_to_human_readable(nanoseconds):
+                    return round(nanoseconds / 1_000_000_000.0 / 60, 4)
+                for key in list(dump.keys()):
+                    if key.endswith('_duration'):
+                        dump[f"{key}_minutes"] = nanoseconds_to_human_readable(dump[key])
+                return dump
+            
+            #response = postprocess(response_ollama.model_dump())
+            
+            prompt_eval_count = response.prompt_eval_count if hasattr(response, 'prompt_eval_count') else 0
+            eval_count = response.eval_count if hasattr(response, 'eval_count') else 0
+            try:
+                content = response_schema.model_validate_json(response.message.content)
+            except Exception as e:  # gracefully replace
+                content = response_schema()
             return LLMResponse(
-                content=response['response'],
-                model=self.model,
-                provider="ollama",
-                timestamp=datetime.now(),
+                raw_content=response.message.content,
+                content=content,
                 token_usage={
-                    "prompt_tokens": response.get('prompt_eval_count', 0),
-                    "completion_tokens": response.get('eval_count', 0),
-                    "total_tokens": response.get('prompt_eval_count', 0) + response.get('eval_count', 0)
+                    "prompt_tokens": prompt_eval_count,
+                    "completion_tokens": eval_count,
+                    "total_tokens": prompt_eval_count + eval_count,
                 },
                 metadata={
-                    "total_duration": response.get('total_duration'),
-                    "load_duration": response.get('load_duration'),
-                    "prompt_eval_duration": response.get('prompt_eval_duration'),
-                    "eval_duration": response.get('eval_duration')
+                    "request_timestamp": request_timestamp.isoformat(),
+                    "response_timestamp": datetime.now().isoformat(),
+                    "finish_reason": "completed",
+                    "inference_provider": {
+                        "name": "ollama",
+                        "release": {
+                            "tag": "v0.9.2",
+                            "url": "https://github.com/ollama/ollama/releases/tag/v0.9.2",
+                            "assets": [
+                                {
+                                    "filename": "ollama-darwin.tgz",
+                                    "sha256_hash": "834cbf10e21ee42ed553784bffd770c7db50a567fb95d58059adfc8ba0225919"
+                                }
+                            ]
+                        },
+                        "modelfile": {
+                            "url": "https://ollama.com/library/gemma3:27b-it-qat",
+                            "sha256_hash": "29eb0b9aeda35295ed728124d341b27e0c6771ea5c586fcabfb157884224fa93"
+                        }
+                    }
                 }
             )
         except Exception as e:
             raise RuntimeError(f"Ollama API error: {str(e)}")
+
+    def _is_valid_path_or_url(self, prompt_part: str) -> bool:
+        """Check if prompt is a valid local path or accessible URL"""
+        # Check if it's a local file path
+        try:
+            if Path(prompt_part.strip()).exists():
+                return True
+        except:
+            pass
+        
+        # Check if it's a URL
+        if prompt_part.strip().startswith(('http://', 'https://')):
+            try:
+                response = requests.head(prompt_part.strip(), timeout=5)
+                return response.status_code == 200
+            except:
+                return False
+        
+        return False
 
 
 class LLMAgent:
