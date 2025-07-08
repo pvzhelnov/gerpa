@@ -215,8 +215,11 @@ class GeminiProvider(BaseLLMProvider):
     def _is_valid_path_or_url(self, prompt_part: str) -> bool:
         """Check if prompt is a valid local path or accessible URL"""
         # Check if it's a local file path
-        if Path(prompt_part.strip()).exists():
-            return True
+        try:
+            if Path(prompt_part.strip()).exists():
+                return True
+        except:
+            pass
         
         # Check if it's a URL
         if prompt_part.strip().startswith(('http://', 'https://')):
