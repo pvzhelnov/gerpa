@@ -84,16 +84,16 @@ class BasePrompt(BaseModel):
         else:
             prompt_parts = [str(self.prompt)] if self.prompt else []
         return prompt_parts
+    
+class BaseResponseSchema(BaseModel):
+    pass
 
 class LLMResponse(BaseModel):
     """Standard response format for all LLM providers"""
     raw_content: str | None = None
-    content: BaseModel = None
+    content: BaseModel = BaseResponseSchema
     token_usage: Optional[Dict[str, Union[int, None]]] = None
     metadata: Dict[str, Any] = {}
-
-class BaseResponseSchema(BaseModel):
-    pass
 
 class BaseLLM(BaseModel):
     """Base class for all LLMs"""
