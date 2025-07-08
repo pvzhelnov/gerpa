@@ -10,9 +10,17 @@ import hashlib
 import logging
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, Any, Optional, Type, Union, List
+from dotenv import load_dotenv
+
+if not load_dotenv():  # Try one level above modules dir
+    dotenv_path = Path(__file__).resolve().parent.parent / ".env"
+    load_dotenv(dotenv_path=dotenv_path)
+
+from typing import Dict, Any, Optional, Type, Union, List, Literal
+from pydantic import BaseModel, Field
+from enum import Enum
+
 from abc import ABC, abstractmethod, ABCMeta
-from pydantic import BaseModel
 
 import requests
 from google import genai
@@ -176,26 +184,37 @@ class GeminiProvider(BaseLLMProvider):
             
             # Add schema instruction as separate item if response_schema is specified
             response_schema = self.model.response_schema
-            if response_schema:
-                schema_instruction = f"Respond with valid JSON matching this schema: {response_schema.model_json_schema()}"
-                contents.append(schema_instruction)
-                
+            
+            # Basic Gemini API compliant config
+            config_dict = {
+                'temperature': self.model.temperature,
+                'top_k': self.model.top_k,
+                'top_p': self.model.top_p,
+                'seed': self.model.seed,
+                'safety_settings': self.model.safety_settings,
+                'response_mime_type': 'application/json',
+                'response_schema': response_schema
+                #'response_json_schema': response_schema.model_json_schema()  # not implemented
+            }
+
+            if response_schema == BaseResponseSchema:  # not set
+                config_dict.pop("response_schema", None)
+
+            if len(self.model.system_instruction.parts()) > 0:  # add only if set - in case unsupported
+                config_dict['system_instruction'] = str(self.model.system_instruction)
+
+            if 'gemma' in self.model.model_name:  # unsupported
+                config_dict.pop("response_schema", None)
+                config_dict.pop("response_mime_type", None)
+
+            request_dict = {
+                "contents": contents,
+                "model": self.model.model_name,
+                "config": types.GenerateContentConfig(**config_dict)
+            }
+
             request_timestamp = datetime.now()
-            response = self.client.models.generate_content(
-                contents=contents,
-                model=self.model.model_name,
-                config=types.GenerateContentConfig(
-                    system_instruction=str(self.model.system_instruction),
-                    temperature=self.model.temperature,
-                    top_k=self.model.top_k,
-                    top_p=self.model.top_p,
-                    seed=self.model.seed,
-                    safety_settings=self.model.safety_settings,
-                    response_mime_type='application/json',
-                    response_schema=response_schema
-                    #response_json_schema=response_schema.model_json_schema()  # not implemented
-                )
-            )
+            response = self.client.models.generate_content(**request_dict)
             
             return LLMResponse(
                 raw_content=response.text,
@@ -505,7 +524,10 @@ class LLMAgent:
             yaml.dump(response_data, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
 
 
-def agent(provider: str, response_schema: Type[BaseModel], **kwargs) -> LLMAgent:
-    """Factory function to create LLM agent"""
-    return LLMAgent(provider_name=provider, response_schema=response_schema, **kwargs)
+def agent(prompt: Union[str, List[str]], response_schema: Type[BaseModel] = BaseResponseSchema, provider_name: str = "gemini", **kwargs) -> LLMResponse:
+    """Factory function to call LLM agent"""
+    llm_agent = LLMAgent(provider_name=provider_name, response_schema=response_schema, **kwargs)
+    return llm_agent(prompt, save_response = True)
+
+__all__ = ["agent", "BaseModel", "Field", "Dict", "Any", "Optional", "Type", "Union", "Literal", "List", "Optional", "Enum"]
 ```

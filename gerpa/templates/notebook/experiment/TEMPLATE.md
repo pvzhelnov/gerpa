@@ -16,56 +16,32 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "# Load environment and imports\n",
-    "from dotenv import load_dotenv\n",
-    "load_dotenv()\n",
+    "# Environment variables are loaded from .env by llm_provider\n",
+    "from modules.llm_provider import *  # imports: ['agent', 'BaseModel', 'Field', 'Any', 'Dict', 'Optional', 'Type', 'Union', 'Literal', 'List', 'Optional', 'Union', 'Enum']\n",
+    "# Define response schema. Uncommment lines if model doesn't support response format\n",
+    "response_schema = [\"Respond with valid JSON object matching this Python class:\\n```python\", \"\"\"\n",
+    "                   \n",
+    "class GenericResponseSchema(BaseModel):\n",
+    "    generic_response: str = Field(..., description=\"Generic response.\")\n",
     "\n",
-    "import sys\n",
-    "sys.path.append('.')\n",
-    "\n",
-    "from modules.llm_provider import agent\n",
-    "from pydantic import BaseModel, Field\n",
-    "from typing import Literal, List, Optional, Union\n",
-    "from enum import Enum\n",
-    "import json\n",
-    "from time import time\n",
-    "import logging\n",
-    "\n",
-    "# Setup logging\n",
-    "logging.basicConfig(level=logging.INFO)"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "# Define response schema (optional)\n",
-    "class SomeResponseSchema(BaseModel):\n",
-    "    summary: str\n",
-    "    key_points: list[str]\n",
-    "    confidence: float"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "# Create agent\n",
-    "LLMPROVIDER = \"gemini\"  # or \"openrouter\", \"ollama\"\n",
-    "llm_agent = agent(LLMPROVIDER, SomeResponseSchema)\n",
-    "\n",
+    "\"\"\", \"```\"]; exec(response_schema[1])  # careful - this executes this code!\n",
     "# Test prompt\n",
-    "prompt = \"Explain quantum computing in simple terms\"\n",
-    "response = llm_agent(prompt)\n",
-    "\n",
-    "print(f\"Content: {response.content}\")\n",
-    "print(f\"Model: {response.model}\")\n",
-    "print(f\"Provider: {response.provider}\")\n",
-    "print(f\"Token usage: {response.token_usage}\")"
+    "system_instruction = \"You are a helpful assistant.\"  # optional\n",
+    "prompt = [\n",
+    "    system_instruction,  # if unsupported as argument\n",
+    "    \"Explain quantum computing in simple terms\",\n",
+    "    \"\".join(response_schema)  # and pass it directly in prompt - if not supported\n",
+    "]\n",
+    "# Run agent\n",
+    "response = agent(\n",
+    "    prompt,\n",
+    "    GenericResponseSchema,\n",
+    "    provider_name = \"gemini\",  # or \"openrouter\", \"ollama\"\n",
+    "    model_name=\"gemma-3-27b-it\",  # doesn't support response schema nor system instruction in this API\n",
+    "    #system_instruction=system_instruction,\n",
+    "    temperature=0.0\n",
+    ")\n",
+    "# This will print the full request/response log."
    ]
   },
   {
@@ -74,17 +50,9 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "# Experiment with different providers\n",
-    "providers = [\"gemini\", \"openrouter\", \"ollama\"]\n",
-    "\n",
-    "for provider in providers:\n",
-    "    try:\n",
-    "        print(f\"\\n--- Testing {provider} ---\")\n",
-    "        test_agent = agent(provider)\n",
-    "        response = test_agent(\"What is the capital of France?\")\n",
-    "        print(f\"Response: {response.content[:100]}...\")\n",
-    "    except Exception as e:\n",
-    "        print(f\"Error with {provider}: {e}\")"
+    "# Print only the response schema model filled in\n",
+    "import json; from IPython.display import Markdown\n",
+    "Markdown('```json\\n' + json.dumps(response.content.model_dump(), indent=2, ensure_ascii=False) + '\\n```')"
    ]
   }
  ],
