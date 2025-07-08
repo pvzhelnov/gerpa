@@ -280,75 +280,176 @@ class OpenRouterProvider(BaseLLMProvider, metaclass=NotReadyMeta):
             base_url="https://openrouter.ai/api/v1",
             api_key=api_key,
         )
+
+    def unsafe_settings(self):
+        # OpenRouter manages safety settings through its own interface or per-model defaults.
+        # API calls do not typically include granular safety controls like Gemini.
+        return {}
         
-    def generate(self, prompt: str, response_schema: Optional[Type[BaseModel]] = None) -> LLMResponse:
+    def generate(self, prompt: BasePrompt) -> LLMResponse:
         try:
-            messages = [{"role": "user", "content": prompt}]
+            # TODO: Adapt to handle BasePrompt and potential multimodal data if OpenRouter supports it
+            # For now, assumes text prompt
+            content_str = " ".join(prompt.parts()) # Simple concatenation for now
+            messages = [{"role": "user", "content": content_str}]
             
-            if response_schema:
+            response_schema = self.model.response_schema
+            if response_schema != BaseResponseSchema:
                 # Add JSON schema instruction
                 schema_instruction = f"\nRespond with valid JSON matching this schema: {response_schema.model_json_schema()}"
-                messages[0]["content"] = prompt + schema_instruction
+                messages[0]["content"] = content_str + schema_instruction
                 
+            request_timestamp = datetime.now()
             response = self.client.chat.completions.create(
-                model=self.model,
-                messages=messages
+                model=self.model.model_name, # Corrected to use model_name from BaseLLM
+                messages=messages,
+                # TODO: Map BaseLLM parameters (temperature, top_p, etc.) to OpenAI compatible params
+                # temperature=self.model.temperature,
+                # top_p=self.model.top_p,
+                # seed=self.model.seed, # if supported
             )
             
+            raw_response_content = response.choices[0].message.content
+
             return LLMResponse(
-                content=response.choices[0].message.content,
-                model=self.model,
-                provider="openrouter",
-                timestamp=datetime.now(),
+                raw_content=raw_response_content,
+                content=response_schema.model_validate_json(raw_response_content.strip().lstrip('```json').lstrip('```').rstrip('```').strip()) if response_schema != BaseResponseSchema else BaseResponseSchema(),
                 token_usage={
                     "prompt_tokens": response.usage.prompt_tokens,
                     "completion_tokens": response.usage.completion_tokens,
                     "total_tokens": response.usage.total_tokens
                 } if response.usage else None,
-                metadata={"finish_reason": response.choices[0].finish_reason}
+                metadata={
+                    "request_timestamp": request_timestamp.isoformat(),
+                    "response_timestamp": datetime.now().isoformat(),
+                    "finish_reason": response.choices[0].finish_reason
+                }
             )
         except Exception as e:
             raise RuntimeError(f"OpenRouter API error: {str(e)}")
 
 
-class OllamaProvider(BaseLLMProvider, metaclass=NotReadyMeta):
+class OllamaLLM(BaseLLM):
+    model_name: Optional[str] = "llama3.1"
+    # Ollama specific, from example
+    # num_ctx: Optional[int] = None # Ollama default is 2048
+    max_tokens: Optional[int] = 8192 # Renamed from num_predict for clarity and consistency with OpenAI
+    min_p: Optional[float] = 0.05
+
+
+class OllamaProvider(BaseLLMProvider):
     """Ollama local provider"""
     
-    def __init__(self, model: str = "llama3.1", host: str = "http://localhost:11434", **kwargs):
-        super().__init__(model, **kwargs)
-        self.host = host
-        
-    def generate(self, prompt: str, response_schema: Optional[Type[BaseModel]] = None) -> LLMResponse:
+    def __init__(self, **kwargs):
+        # Default to OllamaLLM if no specific model config is passed
+        kwargs.setdefault('model', OllamaLLM)
+        # Host from kwargs or env var or default
+        self.host = kwargs.pop('host', os.getenv("OLLAMA_HOST", "http://localhost:11434"))
+        super().__init__(**kwargs)
+        self.client = ollama.Client(host=self.host)
+
+    def unsafe_settings(self):
+        # Ollama safety settings are generally managed at the model/serve level.
+        # This method is here for interface consistency.
+        return {}
+
+    def _encode_image(self, image_path: str) -> str:
+        """Reads an image file and returns its base64 encoded string."""
+        import base64
         try:
-            if response_schema:
-                # Add JSON schema instruction
-                schema_instruction = f"\nRespond with valid JSON matching this schema: {response_schema.model_json_schema()}"
-                prompt = prompt + schema_instruction
-                
-            response = ollama.generate(
-                model=self.model,
-                prompt=prompt,
-                host=self.host
-            )
+            with open(image_path, "rb") as image_file:
+                return base64.b64encode(image_file.read()).decode('utf-8')
+        except Exception as e:
+            # Log or handle error appropriately
+            print(f"Error encoding image {image_path}: {e}")
+            return ""
+
+    def generate(self, prompt: BasePrompt) -> LLMResponse:
+        try:
+            messages = []
+            current_user_message_content = []
+            current_user_images = []
+
+            if self.model.system_instruction and self.model.system_instruction.prompt:
+                messages.append({
+                    "role": "system",
+                    "content": str(self.model.system_instruction)
+                })
+
+            # Process prompt parts for text and images
+            for part in prompt.parts():
+                if Path(part).exists() and Path(part).is_file(): # Basic check for file path
+                    # TODO: Add more robust check for image mime types if necessary
+                    # For now, assume any file path in prompt is an image to be encoded
+                    encoded_image = self._encode_image(part)
+                    if encoded_image:
+                        current_user_images.append(encoded_image)
+                else:
+                    current_user_message_content.append(part)
+
+            user_message = {
+                "role": "user",
+                "content": " ".join(current_user_message_content) # Join text parts
+            }
+            if current_user_images:
+                user_message["images"] = current_user_images
+
+            messages.append(user_message)
+
+            options = {
+                "temperature": self.model.temperature,
+                "top_k": self.model.top_k,
+                "top_p": self.model.top_p,
+                "seed": self.model.seed,
+            }
+            # Add OllamaLLM specific options if they exist on the model object
+            if hasattr(self.model, 'max_tokens') and self.model.max_tokens is not None:
+                options["num_predict"] = self.model.max_tokens # Ollama uses num_predict
+            if hasattr(self.model, 'min_p') and self.model.min_p is not None:
+                options["min_p"] = self.model.min_p
+            # if hasattr(self.model, 'num_ctx') and self.model.num_ctx is not None:
+            #     options["num_ctx"] = self.model.num_ctx
+
+
+            payload = {
+                "model": self.model.model_name,
+                "messages": messages,
+                "options": options,
+                "stream": False # Ensure we get the full response
+            }
+
+            response_schema = self.model.response_schema
+            if response_schema != BaseResponseSchema:
+                payload["format"] = "json"
+                # The schema itself is not passed to Ollama's /api/chat like in the example's `payload_ollama`
+                # which uses `ResearchWasteScreening.model_json_schema()`.
+                # Ollama's `format: "json"` just ensures the output is a JSON string.
+                # If a specific JSON schema needs to be enforced, it should be part of the prompt/system message.
+
+            request_timestamp = datetime.now()
+            response_data = self.client.chat(**payload)
             
+            raw_response_content = response_data['message']['content']
+
             return LLMResponse(
-                content=response['response'],
-                model=self.model,
-                provider="ollama",
-                timestamp=datetime.now(),
+                raw_content=raw_response_content,
+                content=response_schema.model_validate_json(raw_response_content.strip()) if response_schema != BaseResponseSchema else BaseResponseSchema(),
                 token_usage={
-                    "prompt_tokens": response.get('prompt_eval_count', 0),
-                    "completion_tokens": response.get('eval_count', 0),
-                    "total_tokens": response.get('prompt_eval_count', 0) + response.get('eval_count', 0)
+                    "prompt_tokens": response_data.get('prompt_eval_count', 0), # ollama chat response format
+                    "completion_tokens": response_data.get('eval_count', 0),
+                    "total_tokens": response_data.get('prompt_eval_count', 0) + response_data.get('eval_count', 0)
                 },
                 metadata={
-                    "total_duration": response.get('total_duration'),
-                    "load_duration": response.get('load_duration'),
-                    "prompt_eval_duration": response.get('prompt_eval_duration'),
-                    "eval_duration": response.get('eval_duration')
+                    "request_timestamp": request_timestamp.isoformat(),
+                    "response_timestamp": datetime.now().isoformat(),
+                    "total_duration": response_data.get('total_duration'),
+                    "load_duration": response_data.get('load_duration'),
+                    "prompt_eval_duration": response_data.get('prompt_eval_duration'),
+                    "eval_duration": response_data.get('eval_duration')
                 }
             )
         except Exception as e:
+            # Consider more specific error handling if needed
             raise RuntimeError(f"Ollama API error: {str(e)}")
 
 
