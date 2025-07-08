@@ -79,6 +79,7 @@ class BasePrompt(BaseModel):
 
 class LLMResponse(BaseModel):
     """Standard response format for all LLM providers"""
+    raw_content: str | None = None
     content: BaseModel = None
     token_usage: Optional[Dict[str, Union[int, None]]] = None
     metadata: Dict[str, Any] = {}
@@ -197,7 +198,7 @@ class GeminiProvider(BaseLLMProvider):
             )
             
             return LLMResponse(
-                content=response_schema.model_validate_json(response.text),
+                raw_content=response.text,
                 token_usage={
                     "prompt_tokens": response.usage_metadata.prompt_token_count if hasattr(response, 'usage_metadata') else 0,
                     "completion_tokens": response.usage_metadata.candidates_token_count if hasattr(response, 'usage_metadata') else 0,
@@ -420,6 +421,7 @@ class LLMAgent:
                     "response_schema": self.provider.model.response_schema.__name__,  # perhaps to be replaced with a hash later on
                 },
                 "response": {
+                    "raw_content": response.raw_content[:200] + "..." if response.raw_content else None,
                     "content": json_response[:200] + "..." if len(json_response) > 200 else json_response,
                     "token_usage": response.token_usage,
                     "metadata": response.metadata,
@@ -487,6 +489,7 @@ class LLMAgent:
                 "response_schema": self.provider.model.response_schema.model_json_schema()
             },
             "response": {
+                "raw_content": response.raw_content,
                 "content": response.content.model_dump(mode='json'),  # to json - dict is hard to load for evals!
                 "token_usage": response.token_usage,
                 "metadata": response.metadata,
