@@ -80,7 +80,7 @@ class BasePrompt(BaseModel):
 class LLMResponse(BaseModel):
     """Standard response format for all LLM providers"""
     content: BaseModel = None
-    token_usage: Optional[Dict[str, int]] = None
+    token_usage: Optional[Dict[str, Union[int, None]]] = None
     metadata: Dict[str, Any] = {}
 
 class BaseResponseSchema(BaseModel):
