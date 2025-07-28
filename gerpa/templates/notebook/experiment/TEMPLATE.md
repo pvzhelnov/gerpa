@@ -35,7 +35,7 @@
     "# Run agent\n",
     "response = agent(\n",
     "    prompt,\n",
-    "    GenericResponseSchema,\n",
+    "    GenericResponseSchema,  # always passing to be able to validate!\n",
     "    provider_name = \"gemini\",  # or \"openrouter\", \"ollama\"\n",
     "    model_name=\"gemma-3-27b-it\",  # doesn't support response schema nor system instruction in this API\n",
     "    #system_instruction=system_instruction,\n",
