@@ -161,7 +161,7 @@ class BaseLLM(BaseModel):
     safety_settings: Optional[Any] = None
 
 class GeminiLLM(BaseLLM):
-    model_name: Optional[str] = "gemini-2.0-flash"
+    model_name: Optional[str] = "gemma-3-27b-it"
 
 class OllamaLLM(BaseLLM):
     model_name: Optional[str] = "gemma3:27b-it-qat"
