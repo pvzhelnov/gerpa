@@ -156,32 +156,41 @@ class BaseLLM(BaseModel):
     system_instruction: BasePrompt = BasePrompt()
     temperature: Optional[float] = 0.0
     top_k: Optional[int] = 40
-    top_p: Optional[float] = 0.95
+    top_p: Optional[float] = 0.95  # Ollama and AI studio default is 0.95
     seed: Optional[int] = 42
     safety_settings: Optional[Any] = None
 
 class GeminiLLM(BaseLLM):
+    # https://aistudio.google.com/app/u/prompts/new_chat?model=gemma-3-27b-it
     model_name: Optional[str] = "gemma-3-27b-it"
+    top_k: Optional[int] = 64  # AI studio doesn't expose this, so using Ollama's default for gemma3:27b-it-qat (29eb0b9aeda3)
+    max_tokens: Optional[int] = 8192  # AI studio default
+    seed: Optional[int] = 42  # AI studio doesn't expose this, so using Ollama default
+    # also from: https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/content-generation-parameters
+    #'stop_sequences'=["STOP!"],  # perhaps default for API
+    #'presence_penalty'=0.0,  # perhaps default for API
+    #'frequency_penalty'=0.0,  # perhaps default for API
 
 class OllamaLLM(BaseLLM):
     model_name: Optional[str] = "gemma3:27b-it-qat"
+    # https://github.com/ollama/ollama/blob/4261a3b0b264430489921a1b4a16a6267711d595/docs/modelfile.md#valid-parameters-and-values
+    num_ctx: Optional[int] = 4096  # Ollama default; the size of the context window used to generate the next token
+    top_k: Optional[int] = 64  # Ollama's default for gemma3:27b-it-qat (29eb0b9aeda3), see here: https://ollama.com/library/gemma3:27b-it-qat
+    min_p: Optional[float] = 0.05  # Ollama default
+    max_tokens: Optional[int] = 8192  # AI studio default (Ollama default: -1, infinite generation)
+    seed: Optional[int] = 42  # Ollama default
+    # also supported:
+    # repeat_penalty (Default: 1.1)
+    # repeat_last_n (Default: 64, 0 = disabled, -1 = num_ctx). Sets how far back for the model to look back to prevent repetition.
 
-    # https://github.com/ollama/ollama/blob/main/docs/modelfile.md#valid-parameters-and-values
-    num_ctx: Optional[int] = 8192  # Ollama default is 2048, but setting to AI studio default
-    top_p: Optional[float] = 0.95  # Ollama and AI studio default is 0.95
-    top_k: Optional[int] = 64  # AI studio doesn't expose this, so using Ollama's default for gemma3:27b-it-qat (29eb0b9aeda3)
-    min_p: Optional[float] = 0.05  # AI studio doesn't expose this, so using Ollama default
-    max_tokens: Optional[int] = -1  # AI studio doesn't expose this, so using Ollama default: Maximum number of tokens to predict when generating text. (Default: -1, infinite generation)
-    seed: Optional[int] = 42  # AI studio doesn't expose this, so using Ollama default
-
-class OpenRouterLLM(BaseLLM):
-    """Configuration for OpenRouter models"""
+class OpenRouterLLM(BaseLLM):  # set to mirror OllamaLLM
+    # https://openrouter.ai/google/gemma-3-27b-it:free
     model_name: Optional[str] = "google/gemma-3-27b-it:free"
-    top_p: Optional[float] = 0.95
     top_k: Optional[int] = 64
-    min_p: Optional[float] = 0.05
+    min_p: Optional[float] = 0.05  # unsupported with Google AI Studio provider
     max_tokens: Optional[int] = 8192
     seed: Optional[int] = 42
+    # also supported with Chutes provider: Stop, Frequency Penalty, Presence Penalty, Repetition Penalty, Logprobs, Logit Bias, Top Logprobs
 
 class BaseLLMProvider(ABC):
     """Base class for all LLM providers"""
@@ -361,11 +370,13 @@ class GeminiProvider(BaseLLMProvider):
             response_schema = self.model.response_schema
             
             # Basic Gemini API compliant config
+            # https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/content-generation-parameters
             config_dict = {
                 'temperature': self.model.temperature,
                 'top_k': self.model.top_k,
                 'top_p': self.model.top_p,
                 'seed': self.model.seed,
+                'max_output_tokens': self.max_tokens,
                 'safety_settings': self.model.safety_settings,
                 'response_mime_type': 'application/json',
                 'response_schema': response_schema
