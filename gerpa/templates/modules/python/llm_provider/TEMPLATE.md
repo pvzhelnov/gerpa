@@ -16,6 +16,8 @@ from dotenv import load_dotenv
 import pytesseract  # for OCR
 from PIL import Image  # for OCR
 
+from IPython.display import display, Markdown  # for pretty print
+
 if not load_dotenv():  # Try one level above modules dir
     dotenv_path = Path(__file__).resolve().parent.parent / ".env"
     load_dotenv(dotenv_path=dotenv_path)
@@ -147,6 +149,72 @@ class LLMResponse(BaseModel):
     content: BaseModel = BaseResponseSchema()
     token_usage: Optional[Dict[str, Union[int, None]]] = None
     metadata: Dict[str, Any] = {}
+
+    def _dump_json(self, pydantic_model: BaseModel) -> str:
+        return json.dumps(
+            pydantic_model.model_dump(),
+            indent=2,
+            ensure_ascii=False,
+            default=str
+        )
+    
+    def _dump_yaml(self, pydantic_model: BaseModel) -> str:
+        # Custom representer for multiline strings
+        def literal_presenter(dumper, data):
+            if '\n' in data:
+                return dumper.represent_scalar('tag:yaml.org,2002:str', data, style='|')
+            return dumper.represent_scalar('tag:yaml.org,2002:str', data)
+        # Add the custom representer
+        yaml.add_representer(str, literal_presenter)
+        return yaml.dump(
+            pydantic_model.model_dump(mode='json'),
+            default_flow_style=False,
+            sort_keys=False,
+            allow_unicode=True,
+            indent=2,
+        )
+    
+    def content_dump_json(self):
+        """Returns validated content as a JSON string."""
+        return self._dump_json(self.content)
+    
+    def raw_content_dump_json(self):
+        """Returns raw content as a JSON string."""
+        return self._dump_json(self.raw_content)
+
+    def content_dump_yaml(self):
+        """Returns validated content as a multiline YAML string."""
+        return self._dump_yaml(self.content)
+    
+    def raw_content_dump_yaml(self):
+        """Returns raw content as a multiline YAML string."""
+        return self._dump_yaml(self.raw_content)
+
+    def display_markdown_content(self):
+        """Display validated content only, as Markdown."""
+        markdown_content_parts = []
+        if self.content.model_dump():
+            markdown_content_parts.append(
+                "Response received. Validated content:"
+            )
+            yaml_content = self.content_dump_yaml()
+            markdown_content_parts.append(f'```yaml\n{yaml_content}\n```')
+            markdown_content_parts.append(f'Detailed metadata available from full response variable or file.')
+        elif self.raw_content:
+            markdown_content_parts.append(
+                "Response received but failed to validate its content. Raw content:"
+            )
+            raw_json_content = self.raw_content_dump_json()
+            markdown_content_parts.append(f'```json\n{raw_json_content}\n```')
+            markdown_content_parts.append(f'Detailed metadata available from full response variable or file.')
+        else:
+            markdown_content_parts.extend([
+                "No response received or the content is empty.",
+                "Please review the logs or the full response file."
+            ])
+            return
+        
+        display(Markdown("\n\n".join(markdown_content_parts)))
 
 class BaseLLM(BaseModel):
     """Base class for all LLMs"""
