@@ -1,1 +1,1 @@
-__version__ = "0.0.1" # It MUST match the version in pyproject.toml file
+__version__ = "0.0.1+gemma" # It MUST match the version in pyproject.toml file

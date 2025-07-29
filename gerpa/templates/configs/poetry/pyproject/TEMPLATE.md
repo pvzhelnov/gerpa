@@ -1,7 +1,7 @@
 ```ini
 [tool.poetry]
 name = "GERPA"
-version = "0.0.1"
+version = "0.0.1+gemma"
 description = "Generator of Environments for Rapid Prototyping of Agents"
 authors = ["Pavel Zhelnov <pzhelnov@p1m.org>"]
 license = "Apache-2.0"
