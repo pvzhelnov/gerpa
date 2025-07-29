@@ -347,6 +347,7 @@ class GeminiProvider(BaseLLMProvider):
         ]
         
     def generate(self, prompt: BasePrompt) -> LLMResponse:
+        logger = setup_logger()
         try:                
             contents = []
 
@@ -424,7 +425,8 @@ class GeminiProvider(BaseLLMProvider):
                 }
             )
         except Exception as e:
-            raise RuntimeError(f"Gemini API error: {str(e)}")
+            logger.error(f"Error occurred when calling Gemini API: {str(e)}")
+            return LLMResponse.model_construct()
 
     def _upload_file(self, path_or_url: str):
         """Upload file to Gemini"""
@@ -467,6 +469,7 @@ class OpenRouterProvider(BaseLLMProvider):
         return None
 
     def generate(self, prompt: BasePrompt) -> LLMResponse:
+        logger = setup_logger()
         try:
             headers_openrouter = {
                 "Authorization": f"Bearer {self.api_key}",
@@ -557,7 +560,6 @@ class OpenRouterProvider(BaseLLMProvider):
             #    f.write(json.dumps(request_openrouter, indent=2, ensure_ascii=False, default=str))
             ### debug ###
             request_timestamp = datetime.now()
-            logger = setup_logger()
             logger.info(f"Contacting '{self.provider_name}' LLM provider API...")
             response_openrouter = requests.post(**request_openrouter)
             response_openrouter.raise_for_status()
@@ -615,7 +617,8 @@ class OpenRouterProvider(BaseLLMProvider):
                 }
             )
         except Exception as e:
-            raise RuntimeError(f"Error occurred when calling OpenRouter API: {str(e)}")
+            logger.error(f"Error occurred when calling OpenRouter API: {str(e)}")
+            return LLMResponse.model_construct()
 
     def _to_image_url(self, path_or_url: str) -> str | None:
         """Obtain a valid image URL based on given path or URL."""
@@ -679,6 +682,7 @@ class OllamaProvider(BaseLLMProvider):
         pass
         
     def generate(self, prompt: BasePrompt) -> LLMResponse:
+        logger = setup_logger()
         try:    # https://ollama.com/library/gemma3:27b-it-qat
                 # Updated Apr 18, 2025 2:08 AM UTC
                 # gemma3:27b-it-qat
@@ -771,7 +775,8 @@ class OllamaProvider(BaseLLMProvider):
                 }
             )
         except Exception as e:
-            raise RuntimeError(f"Error occurred when calling Ollama API: {str(e)}")
+            logger.error(f"Error occurred when calling Ollama API: {str(e)}")
+            return LLMResponse.model_construct()
 
     def _is_valid_path_or_url(self, prompt_part: str) -> bool:
         """Check if prompt is a valid local path or accessible URL"""
@@ -861,7 +866,7 @@ class LLMAgent:
             
         except Exception as e:
             self.logger.error(f"Error generating response: {str(e)}")
-            raise
+            return LLMResponse.model_construct()
         
     def _save_response(self, response: LLMResponse, prompt: BasePrompt):
         """Save response as YAML file"""
