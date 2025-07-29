@@ -157,15 +157,14 @@ class BaseLLM(BaseModel):
     temperature: Optional[float] = 0.0
     top_k: Optional[int] = 40
     top_p: Optional[float] = 0.95  # Ollama and AI studio default is 0.95
-    seed: Optional[int] = 42
+    seed: Optional[int] = 42  # AI studio doesn't expose this, so using Ollama default
+    max_tokens: Optional[int] = 8192  # AI studio default
     safety_settings: Optional[Any] = None
 
 class GeminiLLM(BaseLLM):
     # https://aistudio.google.com/app/u/prompts/new_chat?model=gemma-3-27b-it
     model_name: Optional[str] = "gemma-3-27b-it"
     top_k: Optional[int] = 64  # AI studio doesn't expose this, so using Ollama's default for gemma3:27b-it-qat (29eb0b9aeda3)
-    max_tokens: Optional[int] = 8192  # AI studio default
-    seed: Optional[int] = 42  # AI studio doesn't expose this, so using Ollama default
     # also from: https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/content-generation-parameters
     #'stop_sequences'=["STOP!"],  # perhaps default for API
     #'presence_penalty'=0.0,  # perhaps default for API
@@ -177,8 +176,7 @@ class OllamaLLM(BaseLLM):
     num_ctx: Optional[int] = 4096  # Ollama default; the size of the context window used to generate the next token
     top_k: Optional[int] = 64  # Ollama's default for gemma3:27b-it-qat (29eb0b9aeda3), see here: https://ollama.com/library/gemma3:27b-it-qat
     min_p: Optional[float] = 0.05  # Ollama default
-    max_tokens: Optional[int] = 8192  # AI studio default (Ollama default: -1, infinite generation)
-    seed: Optional[int] = 42  # Ollama default
+    #max_tokens: Optional[int] (Ollama default: -1, infinite generation)
     # also supported:
     # repeat_penalty (Default: 1.1)
     # repeat_last_n (Default: 64, 0 = disabled, -1 = num_ctx). Sets how far back for the model to look back to prevent repetition.
@@ -188,8 +186,6 @@ class OpenRouterLLM(BaseLLM):  # set to mirror OllamaLLM
     model_name: Optional[str] = "google/gemma-3-27b-it:free"
     top_k: Optional[int] = 64
     min_p: Optional[float] = 0.05  # unsupported with Google AI Studio provider
-    max_tokens: Optional[int] = 8192
-    seed: Optional[int] = 42
     # also supported with Chutes provider: Stop, Frequency Penalty, Presence Penalty, Repetition Penalty, Logprobs, Logit Bias, Top Logprobs
 
 class BaseLLMProvider(ABC):
