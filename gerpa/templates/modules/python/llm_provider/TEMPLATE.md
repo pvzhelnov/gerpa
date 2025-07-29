@@ -180,15 +180,11 @@ class LLMResponse(BaseModel):
     
     def raw_content_dump_json(self):
         """Returns raw content as a JSON string."""
-        return self._dump_json(self.raw_content)
+        return self.raw_content
 
     def content_dump_yaml(self):
         """Returns validated content as a multiline YAML string."""
         return self._dump_yaml(self.content)
-    
-    def raw_content_dump_yaml(self):
-        """Returns raw content as a multiline YAML string."""
-        return self._dump_yaml(self.raw_content)
 
     def display_markdown_content(self):
         """Display validated content only, as Markdown."""
