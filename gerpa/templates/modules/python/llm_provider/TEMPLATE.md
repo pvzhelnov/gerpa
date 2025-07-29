@@ -376,7 +376,7 @@ class GeminiProvider(BaseLLMProvider):
                 'top_k': self.model.top_k,
                 'top_p': self.model.top_p,
                 'seed': self.model.seed,
-                'max_output_tokens': self.max_tokens,
+                'max_output_tokens': self.model.max_tokens,
                 'safety_settings': self.model.safety_settings,
                 'response_mime_type': 'application/json',
                 'response_schema': response_schema
