@@ -22,7 +22,7 @@ if not load_dotenv():  # Try one level above modules dir
     dotenv_path = Path(__file__).resolve().parent.parent / ".env"
     load_dotenv(dotenv_path=dotenv_path)
 
-def setup_logger() -> logging.Logger:
+def setup_logger(console: bool | None = None, file: bool | None = None) -> logging.Logger:
     """Setup logger with date-based file structure"""
     now = datetime.now()
     log_dir = Path("logs") / str(now.year) / f"{now.month:02d}" / f"{now.day:02d}"
@@ -40,28 +40,37 @@ def setup_logger() -> logging.Logger:
     log_file = log_dir / f"{script_name}.log"
     
     logger = logging.getLogger(f"llm_agent_{script_name}")
-    logger.setLevel(logging.INFO)
+
+    # Get log level from environment
+    level_name = os.getenv("LOG_LEVEL", "INFO").upper()
+    level = getattr(logging, level_name, logging.INFO)
+    logger.setLevel(level)
     
     # Remove existing handlers
     for handler in logger.handlers[:]:
         logger.removeHandler(handler)
-        
-    # File handler
-    file_handler = logging.FileHandler(log_file)
-    file_handler.setLevel(logging.INFO)
-    
-    # Console handler
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.INFO)
-    
+
     # Formatter
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    file_handler.setFormatter(formatter)
-    console_handler.setFormatter(formatter)
+        
+    # File handler
+    LOG_FILE = os.getenv("LOG_FILE", "true").lower() == "true"
+    need_log_file = file if file is not None else LOG_FILE  # arg takes precedence
+    if need_log_file:
+        file_handler = logging.FileHandler(log_file)
+        file_handler.setLevel(logging.INFO)
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
     
-    logger.addHandler(file_handler)
-    logger.addHandler(console_handler)
-    
+    # Console handler
+    LOG_CONSOLE = os.getenv("LOG_CONSOLE", "true").lower() == "true"
+    need_log_console = console if console is not None else LOG_CONSOLE  # arg takes precedence
+    if need_log_console:
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(logging.INFO)
+        console_handler.setFormatter(formatter)
+        logger.addHandler(console_handler)
+
     return logger
 
 from typing import Dict, Any, Optional, Type, Union, List, Literal
