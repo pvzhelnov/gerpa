@@ -14,4 +14,6 @@ scikit-learn==1.6.1
 jupyter==1.1.1
 ipykernel==6.29.5
 click==8.2.1
+pytesseract==0.3.13
+pillow==11.3.0
 ```
