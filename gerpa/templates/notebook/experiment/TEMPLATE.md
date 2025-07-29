@@ -79,6 +79,9 @@
    "metadata": {},
    "outputs": [],
    "source": [
+    "# API keys are loaded from .env by llm_provider\n",
+    "from modules.llm_provider import *  # imports: [\"agent\", \"BaseModel\", \"Field\", \"Dict\", \"Any\", \"Optional\", \"Type\", \"Union\", \"Literal\", \"List\", \"Optional\", \"Enum\", \"setup_logger\"]\n",
+    "\n",
     "# Sample class defining custom agent config.\n",
     "class SampleAgentWrapper():  # <-- define as many of these as you need;\n",
     "    # you may also initialize multiple instances of the same class\n",
@@ -101,7 +104,7 @@
     "             pass\n",
     "        ## Set up actual Schema-Guided Response properties\n",
     "        step_1: StepOne\n",
-    "    #\"\"\", \"```\"); exec(SCHEMA_PROMPT_PART[1])  # careful - this executes this code!\n",
+    "    #\"\"\", \"```\"); import textwrap; exec(textwrap.dedent(SCHEMA_PROMPT_PART[1]))  # careful - this executes this code!\n",
     "    # Uncomment the line above if you need to add the schema to the prompt\n",
     "\n",
     "    # Initializes sample agent wrapper\n",
@@ -126,7 +129,7 @@
     "        prompt = []\n",
     "        # Modify the below logic as necessary\n",
     "        #if self.system_instruction:  # if unsupported by provider\n",
-    "        #    prompt.append(self.system_instruction)\n",
+    "        #    prompt.append(f\"System instruction: '{self.system_instruction}'\")\n",
     "        if self.SCHEMA_PROMPT_PART:  # e.g., if provider does not support constrained decoding\n",
     "            prompt.append(\"\".join(self.SCHEMA_PROMPT_PART))\n",
     "        if self.custom_text:\n",
@@ -154,8 +157,8 @@
     "        )  # some other inference config are exposed if supported, including (default values): temperature = 0.0, top_p = 0.95, top_k = 64, max_tokens = 8192, seed = 42, min_p = 0.05\n",
     "\n",
     "    def pprint(self):  # pretty print\n",
-    "        import json; from IPython.display import Markdown\n",
-    "        Markdown('```json\\n' + json.dumps(self.response.content.model_dump(), indent=2, ensure_ascii=False) + '\\n```')\n",
+    "        import json; from IPython.display import display, Markdown\n",
+    "        display(Markdown('```json\\n' + json.dumps(self.response.content.model_dump(), indent=2, ensure_ascii=False) + '\\n```'))\n",
     "\n",
     "sample_agent_instance_1 = SampleAgentWrapper()\n",
     "sample_agent_instance_1.custom_text = 'Some custom text.'\n",
@@ -169,8 +172,8 @@
     "\n",
     "# Use the result as `sample_agent_instance_1.response` if necessary\n",
     "\n",
-    "# Print only the response schema model filled in (if necessary)\n",
-    "#sample_agent_instance_1.pprint()"
+    "# Print only the response schema model filled in\n",
+    "sample_agent_instance_1.pprint()"
    ]
   }
  ],
