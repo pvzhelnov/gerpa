@@ -531,6 +531,9 @@ class OpenRouterProvider(BaseLLMProvider):
             response_schema = self.model.response_schema
             
             payload_openrouter = {
+                'provider': {
+                    'require_parameters': False  # Only use providers that support all parameters in your request, see: https://openrouter.ai/docs/features/provider-routing
+                },
                 "model": self.model.model_name,
                 "options": options_openai,
                 "response_format": {
@@ -541,7 +544,7 @@ class OpenRouterProvider(BaseLLMProvider):
             }
 
             if ((response_schema == BaseResponseSchema) or  # not set
-                ('gemma' in self.model.model_name and 'free' in self.model.model_name)):  # unsupported
+                (f'class {response_schema.__name__}(BaseModel):' in str(messages_openai))):  # unsupported
                 payload_openrouter.pop("response_format", None)
 
             request_openrouter = {
