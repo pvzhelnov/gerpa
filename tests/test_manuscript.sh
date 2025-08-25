@@ -4,7 +4,7 @@ export PS4='+ $(date "+%Y-%m-%d %H:%M:%S")\t '
 
 # --- Configuration ---
 # echo 'PROJECT_ROOT="/app/gerpa"' > .env  # for Jules
-source gerpa/.env
+source .env
 LOG_DIR="$PROJECT_ROOT/tests/logs"
 LOG_FILE="$LOG_DIR/test_manuscript.log"
 
