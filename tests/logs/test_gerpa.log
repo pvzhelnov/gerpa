@@ -1,0 +1,88 @@
++ 2025-08-24 04:13:3104:13:31 echo 'TRACE: set -x executed.'
+TRACE: set -x executed.
++ 2025-08-24 04:13:3104:13:31 echo 'TRACE: PROJECT_ROOT set to: /app/gerpa'
+TRACE: PROJECT_ROOT set to: /app/gerpa
++ 2025-08-24 04:13:3104:13:31 echo 'TRACE: LOG_DIR set to: /app/gerpa/tests/logs'
+TRACE: LOG_DIR set to: /app/gerpa/tests/logs
++ 2025-08-24 04:13:3104:13:31 echo 'TRACE: LOG_FILE set to: /app/gerpa/tests/logs/test_gerpa.log'
+TRACE: LOG_FILE set to: /app/gerpa/tests/logs/test_gerpa.log
++ 2025-08-24 04:13:3104:13:31 echo 'TRACE: --- Logging setup commands (pre-logging) ---'
+TRACE: --- Logging setup commands (pre-logging) ---
++ 2025-08-24 04:13:3104:13:31 echo 'TRACE: mkdir -p "/app/gerpa/tests/logs"'
+TRACE: mkdir -p "/app/gerpa/tests/logs"
++ 2025-08-24 04:13:3104:13:31 echo 'TRACE: TMP_LOG=/tmp/tmp.8KHbeVW7Dd'
+TRACE: TMP_LOG=/tmp/tmp.8KHbeVW7Dd
++ 2025-08-24 04:13:3104:13:31 echo 'TRACE: exec &> >(tee -a "/tmp/tmp.8KHbeVW7Dd")'
+TRACE: exec &> >(tee -a "/tmp/tmp.8KHbeVW7Dd")
++ 2025-08-24 04:13:3104:13:31 echo 'TRACE: export PS4='\''+ $(date "+%Y-%m-%d %H:%M:%S")\t '\'''
+TRACE: export PS4='+ $(date "+%Y-%m-%d %H:%M:%S")\t '
++ 2025-08-24 04:13:3104:13:31 echo 'TRACE: --------------------------------------------'
+TRACE: --------------------------------------------
++ 2025-08-24 04:13:3104:13:31 set -e
++ 2025-08-24 04:13:3104:13:31 trap cleanup EXIT
++ 2025-08-24 04:13:3104:13:31 echo '--- Starting gerpa end-to-end test ---'
+--- Starting gerpa end-to-end test ---
++ 2025-08-24 04:13:3104:13:31 echo '--- Checking for Python 3 ---'
+--- Checking for Python 3 ---
++ 2025-08-24 04:13:3104:13:31 command -v python3
++ 2025-08-24 04:13:3104:13:31 python3 --version
+Python 3.12.11
++ 2025-08-24 04:13:3204:13:32 echo 'Python 3 found.'
+Python 3 found.
++ 2025-08-24 04:13:3204:13:32 echo '--- Installing dependencies ---'
+--- Installing dependencies ---
++ 2025-08-24 04:13:3204:13:32 pip install -r /app/gerpa/requirements.txt
+Requirement already satisfied: click==8.2.1 in /home/jules/.pyenv/versions/3.12.11/lib/python3.12/site-packages (from -r /app/gerpa/requirements.txt (line 1)) (8.2.1)
+Requirement already satisfied: pyyaml==6.0.2 in /home/jules/.pyenv/versions/3.12.11/lib/python3.12/site-packages (from -r /app/gerpa/requirements.txt (line 2)) (6.0.2)
+Requirement already satisfied: toml==0.10.2 in /home/jules/.pyenv/versions/3.12.11/lib/python3.12/site-packages (from -r /app/gerpa/requirements.txt (line 3)) (0.10.2)
+
+[notice] A new release of pip is available: 25.1.1 -> 25.2
+[notice] To update, run: pip install --upgrade pip
++ 2025-08-24 04:13:3304:13:33 echo 'Dependencies installed.'
+Dependencies installed.
++ 2025-08-24 04:13:3304:13:33 echo '--- Installing gerpa ---'
+--- Installing gerpa ---
++ 2025-08-24 04:13:3304:13:33 BIN_DIR=/home/jules/.local/bin
++ 2025-08-24 04:13:3304:13:33 mkdir -p /home/jules/.local/bin
++ 2025-08-24 04:13:3304:13:33 export PATH=/home/jules/.local/bin:/home/jules/.nvm/versions/node/v22.17.1/bin:/home/jules/.pyenv/shims:/home/jules/.pyenv/bin:/home/jules/.local/bin:/go/bin:/usr/local/go/bin:/usr/share/gradle/bin:/usr/share/maven/bin:/home/jules/.local/bin:/home/jules/.cargo/bin:/usr/local/bun/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin
++ 2025-08-24 04:13:3304:13:33 PATH=/home/jules/.local/bin:/home/jules/.nvm/versions/node/v22.17.1/bin:/home/jules/.pyenv/shims:/home/jules/.pyenv/bin:/home/jules/.local/bin:/go/bin:/usr/local/go/bin:/usr/share/gradle/bin:/usr/share/maven/bin:/home/jules/.local/bin:/home/jules/.cargo/bin:/usr/local/bun/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin
++ 2025-08-24 04:13:3304:13:33 mkdir -p /app/gerpa/untracked
++ 2025-08-24 04:13:3304:13:33 cd /app/gerpa
++ 2025-08-24 04:13:3304:13:33 sed '1d;$d' README.md
++ 2025-08-24 04:13:3304:13:33 sed -i 's|PROJECT_ROOT="/abs/path/to/gerpa/repo"|PROJECT_ROOT="/app/gerpa"|g' /app/gerpa/untracked/gerpa
++ 2025-08-24 04:13:3304:13:33 cp /app/gerpa/untracked/gerpa /home/jules/.local/bin/gerpa
++ 2025-08-24 04:13:3304:13:33 chmod +x /home/jules/.local/bin/gerpa
++ 2025-08-24 04:13:3304:13:33 echo '--- gerpa installed successfully ---'
+--- gerpa installed successfully ---
++ 2025-08-24 04:13:3304:13:33 echo '--- Testing gerpa command ---'
+--- Testing gerpa command ---
++ 2025-08-24 04:13:3304:13:33 cd /app/gerpa
++ 2025-08-24 04:13:3304:13:33 gerpa init sample_project --no-git
+✅ Project sample_project created successfully!
+
+Next steps:
+1. cd sample_project
+2. make conda poetry
+3. conda activate sample_project
+4. Copy .env.example to .env and add your API keys
+5. jupyter notebook experiment.ipynb
+6. python -m modules.evaluator
++ 2025-08-24 04:13:3404:13:34 '[' '!' -d /app/gerpa/sample_project ']'
++ 2025-08-24 04:13:3404:13:34 echo 'sample_project directory created.'
+sample_project directory created.
++ 2025-08-24 04:13:3404:13:34 '[' '!' -f /app/gerpa/sample_project/README.md ']'
++ 2025-08-24 04:13:3404:13:34 echo 'sample_project/README.md found.'
+sample_project/README.md found.
++ 2025-08-24 04:13:3404:13:34 echo '--- gerpa command test passed ---'
+--- gerpa command test passed ---
++ 2025-08-24 04:13:3404:13:34 echo '--- gerpa end-to-end test finished successfully ---'
+--- gerpa end-to-end test finished successfully ---
++ 2025-08-24 04:13:3404:13:34 cleanup
++ 2025-08-24 04:13:3404:13:34 echo '--- Cleaning up ---'
+--- Cleaning up ---
++ 2025-08-24 04:13:3404:13:34 rm -rf /app/gerpa/untracked
++ 2025-08-24 04:13:3404:13:34 rm -f /home/jules/.local/bin/gerpa
++ 2025-08-24 04:13:3404:13:34 rm -rf /app/gerpa/sample_project
++ 2025-08-24 04:13:3404:13:34 echo 'Cleanup complete.'
+Cleanup complete.
++ 2025-08-24 04:13:3404:13:34 cat /tmp/tmp.8KHbeVW7Dd

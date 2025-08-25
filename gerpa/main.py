@@ -13,6 +13,7 @@ import re
 import importlib.resources
 import toml
 from enum import Enum
+import shutil
 
 def _infer_package_name() -> str:
     """Infer package name from current file"""
@@ -138,7 +139,8 @@ def cli():
 @cli.command()
 @click.argument('project_name')
 @click.option('--git/--no-git', default=True, help='Initialize git repository')
-def init(project_name: str, git: bool):
+@click.option('--manuscript/--no-manuscript', default=False, help='Include manuscript subdirectory')
+def init(project_name: str, git: bool, manuscript: bool):
     """Initialize a new LLM prototyping project"""
     project_path = Path(project_name)
     
@@ -155,6 +157,49 @@ def init(project_name: str, git: bool):
     ]
     for dir_name in directories:
         (project_path / dir_name).mkdir()
+
+    if manuscript:
+        manuscript_path = project_path / 'manuscript'
+        manuscript_path.mkdir()
+
+        manuscript_dirs = [
+            'build',
+            'refs'
+        ]
+        for dir_name in manuscript_dirs:
+            (manuscript_path / dir_name).mkdir()
+
+        MANUSCRIPT_MAKEREPREF_TEMPLATE = Template('manuscript/python/makerepref', TemplateType.NONE)
+        MANUSCRIPT_BIBMERGE_TEMPLATE = Template('manuscript/python/bibmerge', TemplateType.NONE)
+        MANUSCRIPT_HEAD_TEMPLATE = Template('manuscript/yaml/head', TemplateType.NONE)
+        MANUSCRIPT_VANCOUVER_CSL_TEMPLATE = Template('manuscript/csl/vancouver', TemplateType.NONE)
+        MANUSCRIPT_BIBPATHS_TEMPLATE = Template('manuscript/bib/paths', TemplateType.NONE)
+        MANUSCRIPT_REFS_BIB_TEMPLATE = Template('manuscript/bib/refs', TemplateType.NONE)
+        MANUSCRIPT_REFS_MD_TEMPLATE = Template('manuscript/markdown/refs', TemplateType.NONE)
+        MANUSCRIPT_BODY_MD_TEMPLATE = Template('manuscript/markdown/body', TemplateType.NONE)
+        MANUSCRIPT_FRONT_MD_TEMPLATE = Template('manuscript/markdown/front', TemplateType.NONE)
+
+        manuscript_files = {
+            'build/makerepref.py': MANUSCRIPT_MAKEREPREF_TEMPLATE,
+            'build/bibmerge.py': MANUSCRIPT_BIBMERGE_TEMPLATE,
+            'build/head.yml': MANUSCRIPT_HEAD_TEMPLATE,
+            'build/vancouver.csl': MANUSCRIPT_VANCOUVER_CSL_TEMPLATE,
+            'build/.bibpaths': MANUSCRIPT_BIBPATHS_TEMPLATE,
+            'refs/refs.bib': MANUSCRIPT_REFS_BIB_TEMPLATE,
+            'refs/refs.md': MANUSCRIPT_REFS_MD_TEMPLATE,
+            'body.md': MANUSCRIPT_BODY_MD_TEMPLATE,
+            'front.md': MANUSCRIPT_FRONT_MD_TEMPLATE,
+        }
+
+        for filename, template in manuscript_files.items():
+            file_path = manuscript_path / filename
+            file_path.write_text(str(template))
+
+        # Copy reference.docx
+        package_path = importlib.resources.files(_get_package_name())
+        template_path = package_path / 'templates' / 'manuscript' / 'docx' / 'reference' / 'template_blank.docx'
+        dest_path = manuscript_path / 'build' / 'reference.docx'
+        shutil.copy(template_path, dest_path)
 
     # To be replaced with proper yaml handler
     yaml_lines = str(CONDA_TEMPLATE).strip().split('\n')
@@ -238,6 +283,8 @@ def init(project_name: str, git: bool):
     click.echo(f"4. Copy .env.example to .env and add your API keys")
     click.echo(f"5. jupyter notebook experiment.ipynb")
     click.echo(f"6. python -m modules.evaluator")
+    if manuscript:
+        click.echo(f"7. python manuscript/build/makerepref.py --bibmerge --verbose")
 
 @cli.command()
 def version():

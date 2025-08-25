@@ -1,0 +1,6 @@
+```markdown
+# References
+
+::: {#refs}
+:::
+```

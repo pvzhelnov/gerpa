@@ -8,4 +8,6 @@ dependencies:
   - pip=25.1
   - pip:
     - poetry==2.1.3
+    - quarto
+    - python-docx
 ```

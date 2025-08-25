@@ -1,0 +1,246 @@
++ 2025-08-24 23:33:2623:33:26 echo 'TRACE: set -x executed.'
+TRACE: set -x executed.
++ 2025-08-24 23:33:2623:33:26 echo 'TRACE: export PS4='\''+ $(date "+%Y-%m-%d %H:%M:%S")\t '\'''
+TRACE: export PS4='+ $(date "+%Y-%m-%d %H:%M:%S")\t '
++ 2025-08-24 23:33:2623:33:26 echo 'TRACE: source .env'
+TRACE: source .env
++ 2025-08-24 23:33:2623:33:26 echo 'TRACE: PROJECT_ROOT set to: /Volumes/home/anonymous/cihr_202503pjt/gerpa'
+TRACE: PROJECT_ROOT set to: /Volumes/home/anonymous/cihr_202503pjt/gerpa
++ 2025-08-24 23:33:2623:33:26 echo 'TRACE: LOG_DIR set to: /Volumes/home/anonymous/cihr_202503pjt/gerpa/tests/logs'
+TRACE: LOG_DIR set to: /Volumes/home/anonymous/cihr_202503pjt/gerpa/tests/logs
++ 2025-08-24 23:33:2623:33:26 echo 'TRACE: LOG_FILE set to: /Volumes/home/anonymous/cihr_202503pjt/gerpa/tests/logs/test_manuscript.log'
+TRACE: LOG_FILE set to: /Volumes/home/anonymous/cihr_202503pjt/gerpa/tests/logs/test_manuscript.log
++ 2025-08-24 23:33:2623:33:26 echo 'TRACE: --- Logging setup commands (pre-logging) ---'
+TRACE: --- Logging setup commands (pre-logging) ---
++ 2025-08-24 23:33:2623:33:26 echo 'TRACE: mkdir -p "/Volumes/home/anonymous/cihr_202503pjt/gerpa/tests/logs"'
+TRACE: mkdir -p "/Volumes/home/anonymous/cihr_202503pjt/gerpa/tests/logs"
++ 2025-08-24 23:33:2623:33:26 echo 'TRACE: TMP_LOG=/tmp/tmp.9kgzo1KbYx'
+TRACE: TMP_LOG=/tmp/tmp.9kgzo1KbYx
++ 2025-08-24 23:33:2623:33:26 echo 'TRACE: exec &> >(tee -a "/tmp/tmp.9kgzo1KbYx")'
+TRACE: exec &> >(tee -a "/tmp/tmp.9kgzo1KbYx")
++ 2025-08-24 23:33:2623:33:26 echo 'TRACE: --------------------------------------------'
+TRACE: --------------------------------------------
++ 2025-08-24 23:33:2623:33:26 set -e
++ 2025-08-24 23:33:2623:33:26 trap cleanup EXIT
++ 2025-08-24 23:33:2623:33:26 echo '--- Starting gerpa end-to-end test ---'
+--- Starting gerpa end-to-end test ---
++ 2025-08-24 23:33:2623:33:26 echo '--- Checking for Python 3 ---'
+--- Checking for Python 3 ---
++ 2025-08-24 23:33:2623:33:26 command -v python3
++ 2025-08-24 23:33:2623:33:26 python3 --version
+Python 3.13.2
++ 2025-08-24 23:33:2623:33:26 echo 'Python 3 found.'
+Python 3 found.
++ 2025-08-24 23:33:2623:33:26 echo '--- Installing dependencies ---'
+--- Installing dependencies ---
++ 2025-08-24 23:33:2623:33:26 pip install -r /Volumes/home/anonymous/cihr_202503pjt/gerpa/requirements.txt
+Requirement already satisfied: click==8.2.1 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from -r /Volumes/home/anonymous/cihr_202503pjt/gerpa/requirements.txt (line 1)) (8.2.1)
+Requirement already satisfied: pyyaml==6.0.2 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from -r /Volumes/home/anonymous/cihr_202503pjt/gerpa/requirements.txt (line 2)) (6.0.2)
+Requirement already satisfied: toml==0.10.2 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from -r /Volumes/home/anonymous/cihr_202503pjt/gerpa/requirements.txt (line 3)) (0.10.2)
++ 2025-08-24 23:33:2623:33:26 pip install quarto-cli
+Collecting quarto-cli
+  Downloading quarto_cli-1.7.33.tar.gz (4.6 kB)
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: finished with status 'done'
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Requirement already satisfied: jupyter in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from quarto-cli) (1.1.1)
+Requirement already satisfied: nbclient in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from quarto-cli) (0.10.2)
+Requirement already satisfied: wheel in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from quarto-cli) (0.45.1)
+Requirement already satisfied: notebook in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyter->quarto-cli) (7.4.4)
+Requirement already satisfied: jupyter-console in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyter->quarto-cli) (6.6.3)
+Requirement already satisfied: nbconvert in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyter->quarto-cli) (7.16.6)
+Requirement already satisfied: ipykernel in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyter->quarto-cli) (6.29.5)
+Requirement already satisfied: ipywidgets in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyter->quarto-cli) (8.1.7)
+Requirement already satisfied: jupyterlab in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyter->quarto-cli) (4.4.4)
+Requirement already satisfied: jupyter-client>=6.1.12 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from nbclient->quarto-cli) (8.6.3)
+Requirement already satisfied: jupyter-core!=5.0.*,>=4.12 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from nbclient->quarto-cli) (5.8.1)
+Requirement already satisfied: nbformat>=5.1 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from nbclient->quarto-cli) (5.10.4)
+Requirement already satisfied: traitlets>=5.4 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from nbclient->quarto-cli) (5.14.3)
+Requirement already satisfied: python-dateutil>=2.8.2 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyter-client>=6.1.12->nbclient->quarto-cli) (2.9.0.post0)
+Requirement already satisfied: pyzmq>=23.0 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyter-client>=6.1.12->nbclient->quarto-cli) (27.0.0)
+Requirement already satisfied: tornado>=6.2 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyter-client>=6.1.12->nbclient->quarto-cli) (6.5.1)
+Requirement already satisfied: platformdirs>=2.5 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyter-core!=5.0.*,>=4.12->nbclient->quarto-cli) (4.3.7)
+Requirement already satisfied: fastjsonschema>=2.15 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from nbformat>=5.1->nbclient->quarto-cli) (2.21.1)
+Requirement already satisfied: jsonschema>=2.6 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from nbformat>=5.1->nbclient->quarto-cli) (4.24.0)
+Requirement already satisfied: comm>=0.1.1 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from ipykernel->jupyter->quarto-cli) (0.2.2)
+Requirement already satisfied: debugpy>=1.6.5 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from ipykernel->jupyter->quarto-cli) (1.8.14)
+Requirement already satisfied: ipython>=7.23.1 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from ipykernel->jupyter->quarto-cli) (9.4.0)
+Requirement already satisfied: matplotlib-inline>=0.1 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from ipykernel->jupyter->quarto-cli) (0.1.7)
+Requirement already satisfied: nest-asyncio in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from ipykernel->jupyter->quarto-cli) (1.6.0)
+Requirement already satisfied: packaging in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from ipykernel->jupyter->quarto-cli) (24.2)
+Requirement already satisfied: psutil in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from ipykernel->jupyter->quarto-cli) (7.0.0)
+Requirement already satisfied: widgetsnbextension~=4.0.14 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from ipywidgets->jupyter->quarto-cli) (4.0.14)
+Requirement already satisfied: jupyterlab_widgets~=3.0.15 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from ipywidgets->jupyter->quarto-cli) (3.0.15)
+Requirement already satisfied: prompt-toolkit>=3.0.30 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyter-console->jupyter->quarto-cli) (3.0.51)
+Requirement already satisfied: pygments in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyter-console->jupyter->quarto-cli) (2.19.1)
+Requirement already satisfied: async-lru>=1.0.0 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyterlab->jupyter->quarto-cli) (2.0.5)
+Requirement already satisfied: httpx>=0.25.0 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyterlab->jupyter->quarto-cli) (0.28.1)
+Requirement already satisfied: jinja2>=3.0.3 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyterlab->jupyter->quarto-cli) (3.1.6)
+Requirement already satisfied: jupyter-lsp>=2.0.0 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyterlab->jupyter->quarto-cli) (2.2.5)
+Requirement already satisfied: jupyter-server<3,>=2.4.0 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyterlab->jupyter->quarto-cli) (2.16.0)
+Requirement already satisfied: jupyterlab-server<3,>=2.27.1 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyterlab->jupyter->quarto-cli) (2.27.3)
+Requirement already satisfied: notebook-shim>=0.2 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyterlab->jupyter->quarto-cli) (0.2.4)
+Requirement already satisfied: setuptools>=41.1.0 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyterlab->jupyter->quarto-cli) (78.1.1)
+Requirement already satisfied: beautifulsoup4 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from nbconvert->jupyter->quarto-cli) (4.13.4)
+Requirement already satisfied: bleach!=5.0.0 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from bleach[css]!=5.0.0->nbconvert->jupyter->quarto-cli) (6.2.0)
+Requirement already satisfied: defusedxml in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from nbconvert->jupyter->quarto-cli) (0.7.1)
+Requirement already satisfied: jupyterlab-pygments in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from nbconvert->jupyter->quarto-cli) (0.3.0)
+Requirement already satisfied: markupsafe>=2.0 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from nbconvert->jupyter->quarto-cli) (3.0.2)
+Requirement already satisfied: mistune<4,>=2.0.3 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from nbconvert->jupyter->quarto-cli) (3.1.3)
+Requirement already satisfied: pandocfilters>=1.4.1 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from nbconvert->jupyter->quarto-cli) (1.5.1)
+Requirement already satisfied: webencodings in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from bleach!=5.0.0->bleach[css]!=5.0.0->nbconvert->jupyter->quarto-cli) (0.5.1)
+Requirement already satisfied: tinycss2<1.5,>=1.1.0 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from bleach[css]!=5.0.0->nbconvert->jupyter->quarto-cli) (1.4.0)
+Requirement already satisfied: anyio in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from httpx>=0.25.0->jupyterlab->jupyter->quarto-cli) (4.9.0)
+Requirement already satisfied: certifi in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from httpx>=0.25.0->jupyterlab->jupyter->quarto-cli) (2025.6.15)
+Requirement already satisfied: httpcore==1.* in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from httpx>=0.25.0->jupyterlab->jupyter->quarto-cli) (1.0.9)
+Requirement already satisfied: idna in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from httpx>=0.25.0->jupyterlab->jupyter->quarto-cli) (3.7)
+Requirement already satisfied: h11>=0.16 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from httpcore==1.*->httpx>=0.25.0->jupyterlab->jupyter->quarto-cli) (0.16.0)
+Requirement already satisfied: decorator in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from ipython>=7.23.1->ipykernel->jupyter->quarto-cli) (5.2.1)
+Requirement already satisfied: ipython-pygments-lexers in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from ipython>=7.23.1->ipykernel->jupyter->quarto-cli) (1.1.1)
+Requirement already satisfied: jedi>=0.16 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from ipython>=7.23.1->ipykernel->jupyter->quarto-cli) (0.19.2)
+Requirement already satisfied: pexpect>4.3 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from ipython>=7.23.1->ipykernel->jupyter->quarto-cli) (4.9.0)
+Requirement already satisfied: stack_data in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from ipython>=7.23.1->ipykernel->jupyter->quarto-cli) (0.6.3)
+Requirement already satisfied: attrs>=22.2.0 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jsonschema>=2.6->nbformat>=5.1->nbclient->quarto-cli) (25.3.0)
+Requirement already satisfied: jsonschema-specifications>=2023.03.6 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jsonschema>=2.6->nbformat>=5.1->nbclient->quarto-cli) (2025.4.1)
+Requirement already satisfied: referencing>=0.28.4 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jsonschema>=2.6->nbformat>=5.1->nbclient->quarto-cli) (0.36.2)
+Requirement already satisfied: rpds-py>=0.7.1 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jsonschema>=2.6->nbformat>=5.1->nbclient->quarto-cli) (0.26.0)
+Requirement already satisfied: argon2-cffi>=21.1 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyter-server<3,>=2.4.0->jupyterlab->jupyter->quarto-cli) (25.1.0)
+Requirement already satisfied: jupyter-events>=0.11.0 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyter-server<3,>=2.4.0->jupyterlab->jupyter->quarto-cli) (0.12.0)
+Requirement already satisfied: jupyter-server-terminals>=0.4.4 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyter-server<3,>=2.4.0->jupyterlab->jupyter->quarto-cli) (0.5.3)
+Requirement already satisfied: overrides>=5.0 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyter-server<3,>=2.4.0->jupyterlab->jupyter->quarto-cli) (7.7.0)
+Requirement already satisfied: prometheus-client>=0.9 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyter-server<3,>=2.4.0->jupyterlab->jupyter->quarto-cli) (0.22.1)
+Requirement already satisfied: send2trash>=1.8.2 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyter-server<3,>=2.4.0->jupyterlab->jupyter->quarto-cli) (1.8.3)
+Requirement already satisfied: terminado>=0.8.3 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyter-server<3,>=2.4.0->jupyterlab->jupyter->quarto-cli) (0.18.1)
+Requirement already satisfied: websocket-client>=1.7 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyter-server<3,>=2.4.0->jupyterlab->jupyter->quarto-cli) (1.8.0)
+Requirement already satisfied: babel>=2.10 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyterlab-server<3,>=2.27.1->jupyterlab->jupyter->quarto-cli) (2.17.0)
+Requirement already satisfied: json5>=0.9.0 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyterlab-server<3,>=2.27.1->jupyterlab->jupyter->quarto-cli) (0.12.0)
+Requirement already satisfied: requests>=2.31 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyterlab-server<3,>=2.27.1->jupyterlab->jupyter->quarto-cli) (2.32.3)
+Requirement already satisfied: wcwidth in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from prompt-toolkit>=3.0.30->jupyter-console->jupyter->quarto-cli) (0.2.13)
+Requirement already satisfied: six>=1.5 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from python-dateutil>=2.8.2->jupyter-client>=6.1.12->nbclient->quarto-cli) (1.17.0)
+Requirement already satisfied: soupsieve>1.2 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from beautifulsoup4->nbconvert->jupyter->quarto-cli) (2.7)
+Requirement already satisfied: typing-extensions>=4.0.0 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from beautifulsoup4->nbconvert->jupyter->quarto-cli) (4.14.1)
+Requirement already satisfied: sniffio>=1.1 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from anyio->httpx>=0.25.0->jupyterlab->jupyter->quarto-cli) (1.3.1)
+Requirement already satisfied: argon2-cffi-bindings in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from argon2-cffi>=21.1->jupyter-server<3,>=2.4.0->jupyterlab->jupyter->quarto-cli) (21.2.0)
+Requirement already satisfied: parso<0.9.0,>=0.8.4 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jedi>=0.16->ipython>=7.23.1->ipykernel->jupyter->quarto-cli) (0.8.4)
+Requirement already satisfied: python-json-logger>=2.0.4 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyter-events>=0.11.0->jupyter-server<3,>=2.4.0->jupyterlab->jupyter->quarto-cli) (3.3.0)
+Requirement already satisfied: pyyaml>=5.3 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyter-events>=0.11.0->jupyter-server<3,>=2.4.0->jupyterlab->jupyter->quarto-cli) (6.0.2)
+Requirement already satisfied: rfc3339-validator in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyter-events>=0.11.0->jupyter-server<3,>=2.4.0->jupyterlab->jupyter->quarto-cli) (0.1.4)
+Requirement already satisfied: rfc3986-validator>=0.1.1 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jupyter-events>=0.11.0->jupyter-server<3,>=2.4.0->jupyterlab->jupyter->quarto-cli) (0.1.1)
+Requirement already satisfied: ptyprocess>=0.5 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from pexpect>4.3->ipython>=7.23.1->ipykernel->jupyter->quarto-cli) (0.7.0)
+Requirement already satisfied: charset-normalizer<4,>=2 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from requests>=2.31->jupyterlab-server<3,>=2.27.1->jupyterlab->jupyter->quarto-cli) (3.3.2)
+Requirement already satisfied: urllib3<3,>=1.21.1 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from requests>=2.31->jupyterlab-server<3,>=2.27.1->jupyterlab->jupyter->quarto-cli) (2.3.0)
+Requirement already satisfied: executing>=1.2.0 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from stack_data->ipython>=7.23.1->ipykernel->jupyter->quarto-cli) (2.2.0)
+Requirement already satisfied: asttokens>=2.1.0 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from stack_data->ipython>=7.23.1->ipykernel->jupyter->quarto-cli) (3.0.0)
+Requirement already satisfied: pure-eval in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from stack_data->ipython>=7.23.1->ipykernel->jupyter->quarto-cli) (0.2.3)
+Requirement already satisfied: fqdn in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jsonschema[format-nongpl]>=4.18.0->jupyter-events>=0.11.0->jupyter-server<3,>=2.4.0->jupyterlab->jupyter->quarto-cli) (1.5.1)
+Requirement already satisfied: isoduration in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jsonschema[format-nongpl]>=4.18.0->jupyter-events>=0.11.0->jupyter-server<3,>=2.4.0->jupyterlab->jupyter->quarto-cli) (20.11.0)
+Requirement already satisfied: jsonpointer>1.13 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jsonschema[format-nongpl]>=4.18.0->jupyter-events>=0.11.0->jupyter-server<3,>=2.4.0->jupyterlab->jupyter->quarto-cli) (2.1)
+Requirement already satisfied: uri-template in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jsonschema[format-nongpl]>=4.18.0->jupyter-events>=0.11.0->jupyter-server<3,>=2.4.0->jupyterlab->jupyter->quarto-cli) (1.3.0)
+Requirement already satisfied: webcolors>=24.6.0 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from jsonschema[format-nongpl]>=4.18.0->jupyter-events>=0.11.0->jupyter-server<3,>=2.4.0->jupyterlab->jupyter->quarto-cli) (24.11.1)
+Requirement already satisfied: cffi>=1.0.1 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from argon2-cffi-bindings->argon2-cffi>=21.1->jupyter-server<3,>=2.4.0->jupyterlab->jupyter->quarto-cli) (1.17.1)
+Requirement already satisfied: pycparser in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from cffi>=1.0.1->argon2-cffi-bindings->argon2-cffi>=21.1->jupyter-server<3,>=2.4.0->jupyterlab->jupyter->quarto-cli) (2.21)
+Requirement already satisfied: arrow>=0.15.0 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from isoduration->jsonschema[format-nongpl]>=4.18.0->jupyter-events>=0.11.0->jupyter-server<3,>=2.4.0->jupyterlab->jupyter->quarto-cli) (1.3.0)
+Requirement already satisfied: types-python-dateutil>=2.8.10 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from arrow>=0.15.0->isoduration->jsonschema[format-nongpl]>=4.18.0->jupyter-events>=0.11.0->jupyter-server<3,>=2.4.0->jupyterlab->jupyter->quarto-cli) (2.9.0.20250708)
+Building wheels for collected packages: quarto-cli
+  Building wheel for quarto-cli (pyproject.toml): started
+  Building wheel for quarto-cli (pyproject.toml): finished with status 'done'
+  Created wheel for quarto-cli: filename=quarto_cli-1.7.33-py3-none-any.whl size=137919677 sha256=bb5fbbf4906b97efca8a7119fb3ac17da806db133f7d4c5d7a3fdd38c2e76692
+  Stored in directory: /home/anonymous.linux/.cache/pip/wheels/46/19/5a/1e02b4e90ed9bbb5e72c3b75e6cd9a7a4ce741d01336695dd6
+Successfully built quarto-cli
+Installing collected packages: quarto-cli
+Successfully installed quarto-cli-1.7.33
++ 2025-08-24 23:33:5323:33:53 echo 'Dependencies installed.'
+Dependencies installed.
++ 2025-08-24 23:33:5323:33:53 echo '--- Installing gerpa ---'
+--- Installing gerpa ---
++ 2025-08-24 23:33:5323:33:53 BIN_DIR=/home/anonymous.linux/.local/bin
++ 2025-08-24 23:33:5323:33:53 mkdir -p /home/anonymous.linux/.local/bin
++ 2025-08-24 23:33:5323:33:53 export PATH=/home/anonymous.linux/.local/bin:/home/anonymous.linux/.local/bin:/home/anonymous.linux/miniconda3/bin:/home/anonymous.linux/miniconda3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/usr/sbin:/sbin:/usr/sbin:/sbin
++ 2025-08-24 23:33:5323:33:53 PATH=/home/anonymous.linux/.local/bin:/home/anonymous.linux/.local/bin:/home/anonymous.linux/miniconda3/bin:/home/anonymous.linux/miniconda3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/usr/sbin:/sbin:/usr/sbin:/sbin
++ 2025-08-24 23:33:5323:33:53 mkdir -p /Volumes/home/anonymous/cihr_202503pjt/gerpa/untracked
++ 2025-08-24 23:33:5323:33:53 cd /Volumes/home/anonymous/cihr_202503pjt/gerpa
++ 2025-08-24 23:33:5323:33:53 sed '1d;$d' README.md
++ 2025-08-24 23:33:5323:33:53 sed -i 's|PROJECT_ROOT="/abs/path/to/gerpa/repo"|PROJECT_ROOT="/Volumes/home/anonymous/cihr_202503pjt/gerpa"|g' /Volumes/home/anonymous/cihr_202503pjt/gerpa/untracked/gerpa
++ 2025-08-24 23:33:5323:33:53 cp /Volumes/home/anonymous/cihr_202503pjt/gerpa/untracked/gerpa /home/anonymous.linux/.local/bin/gerpa
++ 2025-08-24 23:33:5323:33:53 chmod +x /home/anonymous.linux/.local/bin/gerpa
++ 2025-08-24 23:33:5323:33:53 echo '--- gerpa installed successfully ---'
+--- gerpa installed successfully ---
++ 2025-08-24 23:33:5323:33:53 echo '--- Testing gerpa command ---'
+--- Testing gerpa command ---
++ 2025-08-24 23:33:5323:33:53 cd /Volumes/home/anonymous/cihr_202503pjt/gerpa
++ 2025-08-24 23:33:5323:33:53 gerpa init sample_project --manuscript
+✅ Git repository initialized in sample_project
+✅ Project sample_project created successfully!
+
+Next steps:
+1. cd sample_project
+2. make conda poetry
+3. conda activate sample_project
+4. Copy .env.example to .env and add your API keys
+5. jupyter notebook experiment.ipynb
+6. python -m modules.evaluator
+7. python manuscript/build/makerepref.py --bibmerge --verbose
++ 2025-08-24 23:33:5323:33:53 '[' '!' -d /Volumes/home/anonymous/cihr_202503pjt/gerpa/sample_project ']'
++ 2025-08-24 23:33:5323:33:53 echo 'sample_project directory created.'
+sample_project directory created.
++ 2025-08-24 23:33:5323:33:53 '[' '!' -f /Volumes/home/anonymous/cihr_202503pjt/gerpa/sample_project/README.md ']'
++ 2025-08-24 23:33:5323:33:53 echo 'sample_project/README.md found.'
+sample_project/README.md found.
++ 2025-08-24 23:33:5323:33:53 '[' '!' -d /Volumes/home/anonymous/cihr_202503pjt/gerpa/sample_project/manuscript ']'
++ 2025-08-24 23:33:5323:33:53 echo 'sample_project/manuscript directory created.'
+sample_project/manuscript directory created.
++ 2025-08-24 23:33:5323:33:53 '[' '!' -f /Volumes/home/anonymous/cihr_202503pjt/gerpa/sample_project/manuscript/build/makerepref.py ']'
++ 2025-08-24 23:33:5323:33:53 echo 'sample_project/manuscript/build/makerepref.py found.'
+sample_project/manuscript/build/makerepref.py found.
++ 2025-08-24 23:33:5323:33:53 echo '--- Running makerepref.py script ---'
+--- Running makerepref.py script ---
++ 2025-08-24 23:33:5323:33:53 cd /Volumes/home/anonymous/cihr_202503pjt/gerpa/sample_project
++ 2025-08-24 23:33:5323:33:53 python manuscript/build/makerepref.py --bibmerge --verbose
+Running bibmerge...
+Command: python manuscript/build/bibmerge.py manuscript/build/.bibpaths
+No *.bib files found to merge.
+Concatenating markdown files...
+Rendering with quarto...
+Command: quarto render manuscript.md --to docx --output manuscript.docx --metadata-file=manuscript/build/head.yml
+
+pandoc --output manuscript.docx
+  to: docx
+  default-image-extension: png
+  reference-doc: manuscript/build/reference.docx
+  variables: {}
+  
+metadata
+  title: My Manuscript
+  author: John Doe
+  date: '2025-08-24'
+  bibliography: manuscript/refs/refs.bib
+  csl: manuscript/build/vancouver.csl
+  reference-doc: manuscript/build/reference.docx
+  output:
+    word_document:
+      reference_docx: manuscript/build/reference.docx
+  
+Output created: manuscript.docx
+
+
+Cleaning up temporary files...
+Manuscript build complete.
++ 2025-08-24 23:33:5423:33:54 '[' '!' -f /Volumes/home/anonymous/cihr_202503pjt/gerpa/sample_project/manuscript.docx ']'
++ 2025-08-24 23:33:5423:33:54 echo 'sample_project/manuscript.docx found.'
+sample_project/manuscript.docx found.
++ 2025-08-24 23:33:5423:33:54 echo '--- gerpa command test passed ---'
+--- gerpa command test passed ---
++ 2025-08-24 23:33:5423:33:54 echo '--- gerpa end-to-end test finished successfully ---'
+--- gerpa end-to-end test finished successfully ---
++ 2025-08-24 23:33:5423:33:54 cleanup
++ 2025-08-24 23:33:5423:33:54 echo '--- Cleaning up ---'
+--- Cleaning up ---
++ 2025-08-24 23:33:5423:33:54 rm -rf /Volumes/home/anonymous/cihr_202503pjt/gerpa/untracked
++ 2025-08-24 23:33:5423:33:54 rm -f /home/anonymous.linux/.local/bin/gerpa
++ 2025-08-24 23:33:5423:33:54 rm -rf /Volumes/home/anonymous/cihr_202503pjt/gerpa/sample_project
++ 2025-08-24 23:33:5423:33:54 echo 'Cleanup complete.'
+Cleanup complete.
++ 2025-08-24 23:33:5423:33:54 cat /tmp/tmp.9kgzo1KbYx
