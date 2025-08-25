@@ -1,3 +1,3 @@
 ```
-refs
+manuscript/refs
 ```

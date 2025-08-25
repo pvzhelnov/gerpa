@@ -1,43 +1,43 @@
-+ 2025-08-24 23:42:3123:42:31 echo 'TRACE: set -x executed.'
++ 2025-08-25 01:49:0001:49:00 echo 'TRACE: set -x executed.'
 TRACE: set -x executed.
-+ 2025-08-24 23:42:3123:42:31 echo 'TRACE: export PS4='\''+ $(date "+%Y-%m-%d %H:%M:%S")\t '\'''
++ 2025-08-25 01:49:0001:49:00 echo 'TRACE: export PS4='\''+ $(date "+%Y-%m-%d %H:%M:%S")\t '\'''
 TRACE: export PS4='+ $(date "+%Y-%m-%d %H:%M:%S")\t '
-+ 2025-08-24 23:42:3123:42:31 echo 'TRACE: source .env'
++ 2025-08-25 01:49:0001:49:00 echo 'TRACE: source .env'
 TRACE: source .env
-+ 2025-08-24 23:42:3123:42:31 echo 'TRACE: PROJECT_ROOT set to: /Volumes/home/anonymous/gerpa'
++ 2025-08-25 01:49:0001:49:00 echo 'TRACE: PROJECT_ROOT set to: /Volumes/home/anonymous/gerpa'
 TRACE: PROJECT_ROOT set to: /Volumes/home/anonymous/gerpa
-+ 2025-08-24 23:42:3123:42:31 echo 'TRACE: LOG_DIR set to: /Volumes/home/anonymous/gerpa/tests/logs'
++ 2025-08-25 01:49:0001:49:00 echo 'TRACE: LOG_DIR set to: /Volumes/home/anonymous/gerpa/tests/logs'
 TRACE: LOG_DIR set to: /Volumes/home/anonymous/gerpa/tests/logs
-+ 2025-08-24 23:42:3123:42:31 echo 'TRACE: LOG_FILE set to: /Volumes/home/anonymous/gerpa/tests/logs/test_manuscript.log'
++ 2025-08-25 01:49:0001:49:00 echo 'TRACE: LOG_FILE set to: /Volumes/home/anonymous/gerpa/tests/logs/test_manuscript.log'
 TRACE: LOG_FILE set to: /Volumes/home/anonymous/gerpa/tests/logs/test_manuscript.log
-+ 2025-08-24 23:42:3123:42:31 echo 'TRACE: --- Logging setup commands (pre-logging) ---'
++ 2025-08-25 01:49:0001:49:00 echo 'TRACE: --- Logging setup commands (pre-logging) ---'
 TRACE: --- Logging setup commands (pre-logging) ---
-+ 2025-08-24 23:42:3123:42:31 echo 'TRACE: mkdir -p "/Volumes/home/anonymous/gerpa/tests/logs"'
++ 2025-08-25 01:49:0001:49:00 echo 'TRACE: mkdir -p "/Volumes/home/anonymous/gerpa/tests/logs"'
 TRACE: mkdir -p "/Volumes/home/anonymous/gerpa/tests/logs"
-+ 2025-08-24 23:42:3123:42:31 echo 'TRACE: TMP_LOG=/tmp/tmp.XzfIXGBdpe'
-TRACE: TMP_LOG=/tmp/tmp.XzfIXGBdpe
-+ 2025-08-24 23:42:3123:42:31 echo 'TRACE: exec &> >(tee -a "/tmp/tmp.XzfIXGBdpe")'
-TRACE: exec &> >(tee -a "/tmp/tmp.XzfIXGBdpe")
-+ 2025-08-24 23:42:3123:42:31 echo 'TRACE: --------------------------------------------'
++ 2025-08-25 01:49:0001:49:00 echo 'TRACE: TMP_LOG=/tmp/tmp.GEPATKyATI'
+TRACE: TMP_LOG=/tmp/tmp.GEPATKyATI
++ 2025-08-25 01:49:0001:49:00 echo 'TRACE: exec &> >(tee -a "/tmp/tmp.GEPATKyATI")'
+TRACE: exec &> >(tee -a "/tmp/tmp.GEPATKyATI")
++ 2025-08-25 01:49:0001:49:00 echo 'TRACE: --------------------------------------------'
 TRACE: --------------------------------------------
-+ 2025-08-24 23:42:3123:42:31 set -e
-+ 2025-08-24 23:42:3123:42:31 trap cleanup EXIT
-+ 2025-08-24 23:42:3123:42:31 echo '--- Starting gerpa end-to-end test ---'
++ 2025-08-25 01:49:0001:49:00 set -e
++ 2025-08-25 01:49:0001:49:00 trap cleanup EXIT
++ 2025-08-25 01:49:0001:49:00 echo '--- Starting gerpa end-to-end test ---'
 --- Starting gerpa end-to-end test ---
-+ 2025-08-24 23:42:3123:42:31 echo '--- Checking for Python 3 ---'
++ 2025-08-25 01:49:0001:49:00 echo '--- Checking for Python 3 ---'
 --- Checking for Python 3 ---
-+ 2025-08-24 23:42:3123:42:31 command -v python3
-+ 2025-08-24 23:42:3123:42:31 python3 --version
++ 2025-08-25 01:49:0001:49:00 command -v python3
++ 2025-08-25 01:49:0001:49:00 python3 --version
 Python 3.13.2
-+ 2025-08-24 23:42:3123:42:31 echo 'Python 3 found.'
++ 2025-08-25 01:49:0001:49:00 echo 'Python 3 found.'
 Python 3 found.
-+ 2025-08-24 23:42:3123:42:31 echo '--- Installing dependencies ---'
++ 2025-08-25 01:49:0001:49:00 echo '--- Installing dependencies ---'
 --- Installing dependencies ---
-+ 2025-08-24 23:42:3123:42:31 pip install -r /Volumes/home/anonymous/gerpa/requirements.txt
++ 2025-08-25 01:49:0001:49:00 pip install -r /Volumes/home/anonymous/gerpa/requirements.txt
 Requirement already satisfied: click==8.2.1 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from -r /Volumes/home/anonymous/gerpa/requirements.txt (line 1)) (8.2.1)
 Requirement already satisfied: pyyaml==6.0.2 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from -r /Volumes/home/anonymous/gerpa/requirements.txt (line 2)) (6.0.2)
 Requirement already satisfied: toml==0.10.2 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from -r /Volumes/home/anonymous/gerpa/requirements.txt (line 3)) (0.10.2)
-+ 2025-08-24 23:42:3123:42:31 pip install quarto-cli
++ 2025-08-25 01:49:0101:49:01 pip install quarto-cli
 Requirement already satisfied: quarto-cli in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (1.7.33)
 Requirement already satisfied: jupyter in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from quarto-cli) (1.1.1)
 Requirement already satisfied: nbclient in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from quarto-cli) (0.10.2)
@@ -137,26 +137,26 @@ Requirement already satisfied: cffi>=1.0.1 in /home/anonymous.linux/miniconda3/l
 Requirement already satisfied: pycparser in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from cffi>=1.0.1->argon2-cffi-bindings->argon2-cffi>=21.1->jupyter-server<3,>=2.4.0->jupyterlab->jupyter->quarto-cli) (2.21)
 Requirement already satisfied: arrow>=0.15.0 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from isoduration->jsonschema[format-nongpl]>=4.18.0->jupyter-events>=0.11.0->jupyter-server<3,>=2.4.0->jupyterlab->jupyter->quarto-cli) (1.3.0)
 Requirement already satisfied: types-python-dateutil>=2.8.10 in /home/anonymous.linux/miniconda3/lib/python3.13/site-packages (from arrow>=0.15.0->isoduration->jsonschema[format-nongpl]>=4.18.0->jupyter-events>=0.11.0->jupyter-server<3,>=2.4.0->jupyterlab->jupyter->quarto-cli) (2.9.0.20250708)
-+ 2025-08-24 23:42:3223:42:32 echo 'Dependencies installed.'
++ 2025-08-25 01:49:0101:49:01 echo 'Dependencies installed.'
 Dependencies installed.
-+ 2025-08-24 23:42:3223:42:32 echo '--- Installing gerpa ---'
++ 2025-08-25 01:49:0101:49:01 echo '--- Installing gerpa ---'
 --- Installing gerpa ---
-+ 2025-08-24 23:42:3223:42:32 BIN_DIR=/home/anonymous.linux/.local/bin
-+ 2025-08-24 23:42:3223:42:32 mkdir -p /home/anonymous.linux/.local/bin
-+ 2025-08-24 23:42:3223:42:32 export PATH=/home/anonymous.linux/.local/bin:/home/anonymous.linux/.local/bin:/home/anonymous.linux/miniconda3/bin:/home/anonymous.linux/miniconda3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/usr/sbin:/sbin:/usr/sbin:/sbin
-+ 2025-08-24 23:42:3223:42:32 PATH=/home/anonymous.linux/.local/bin:/home/anonymous.linux/.local/bin:/home/anonymous.linux/miniconda3/bin:/home/anonymous.linux/miniconda3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/usr/sbin:/sbin:/usr/sbin:/sbin
-+ 2025-08-24 23:42:3223:42:32 mkdir -p /Volumes/home/anonymous/gerpa/untracked
-+ 2025-08-24 23:42:3223:42:32 cd /Volumes/home/anonymous/gerpa
-+ 2025-08-24 23:42:3223:42:32 sed '1d;$d' README.md
-+ 2025-08-24 23:42:3223:42:32 sed -i 's|PROJECT_ROOT="/abs/path/to/gerpa/repo"|PROJECT_ROOT="/Volumes/home/anonymous/gerpa"|g' /Volumes/home/anonymous/gerpa/untracked/gerpa
-+ 2025-08-24 23:42:3223:42:32 cp /Volumes/home/anonymous/gerpa/untracked/gerpa /home/anonymous.linux/.local/bin/gerpa
-+ 2025-08-24 23:42:3223:42:32 chmod +x /home/anonymous.linux/.local/bin/gerpa
-+ 2025-08-24 23:42:3223:42:32 echo '--- gerpa installed successfully ---'
++ 2025-08-25 01:49:0101:49:01 BIN_DIR=/home/anonymous.linux/.local/bin
++ 2025-08-25 01:49:0101:49:01 mkdir -p /home/anonymous.linux/.local/bin
++ 2025-08-25 01:49:0101:49:01 export PATH=/home/anonymous.linux/.local/bin:/home/anonymous.linux/.local/bin:/home/anonymous.linux/miniconda3/bin:/home/anonymous.linux/miniconda3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/usr/sbin:/sbin:/usr/sbin:/sbin
++ 2025-08-25 01:49:0101:49:01 PATH=/home/anonymous.linux/.local/bin:/home/anonymous.linux/.local/bin:/home/anonymous.linux/miniconda3/bin:/home/anonymous.linux/miniconda3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/usr/sbin:/sbin:/usr/sbin:/sbin
++ 2025-08-25 01:49:0101:49:01 mkdir -p /Volumes/home/anonymous/gerpa/untracked
++ 2025-08-25 01:49:0101:49:01 cd /Volumes/home/anonymous/gerpa
++ 2025-08-25 01:49:0101:49:01 sed '1d;$d' README.md
++ 2025-08-25 01:49:0101:49:01 sed -i 's|PROJECT_ROOT="/abs/path/to/gerpa/repo"|PROJECT_ROOT="/Volumes/home/anonymous/gerpa"|g' /Volumes/home/anonymous/gerpa/untracked/gerpa
++ 2025-08-25 01:49:0101:49:01 cp /Volumes/home/anonymous/gerpa/untracked/gerpa /home/anonymous.linux/.local/bin/gerpa
++ 2025-08-25 01:49:0101:49:01 chmod +x /home/anonymous.linux/.local/bin/gerpa
++ 2025-08-25 01:49:0101:49:01 echo '--- gerpa installed successfully ---'
 --- gerpa installed successfully ---
-+ 2025-08-24 23:42:3223:42:32 echo '--- Testing gerpa command ---'
++ 2025-08-25 01:49:0101:49:01 echo '--- Testing gerpa command ---'
 --- Testing gerpa command ---
-+ 2025-08-24 23:42:3223:42:32 cd /Volumes/home/anonymous/gerpa
-+ 2025-08-24 23:42:3223:42:32 gerpa init sample_project --manuscript
++ 2025-08-25 01:49:0101:49:01 cd /Volumes/home/anonymous/gerpa
++ 2025-08-25 01:49:0101:49:01 gerpa init sample_project --manuscript
 ✅ Git repository initialized in sample_project
 ✅ Project sample_project created successfully!
 
@@ -168,64 +168,61 @@ Next steps:
 5. jupyter notebook experiment.ipynb
 6. python -m modules.evaluator
 7. python manuscript/build/makerepref.py --bibmerge --verbose
-+ 2025-08-24 23:42:3223:42:32 '[' '!' -d /Volumes/home/anonymous/gerpa/sample_project ']'
-+ 2025-08-24 23:42:3223:42:32 echo 'sample_project directory created.'
++ 2025-08-25 01:49:0101:49:01 '[' '!' -d /Volumes/home/anonymous/gerpa/sample_project ']'
++ 2025-08-25 01:49:0101:49:01 echo 'sample_project directory created.'
 sample_project directory created.
-+ 2025-08-24 23:42:3223:42:32 '[' '!' -f /Volumes/home/anonymous/gerpa/sample_project/README.md ']'
-+ 2025-08-24 23:42:3223:42:32 echo 'sample_project/README.md found.'
++ 2025-08-25 01:49:0101:49:01 '[' '!' -f /Volumes/home/anonymous/gerpa/sample_project/README.md ']'
++ 2025-08-25 01:49:0101:49:01 echo 'sample_project/README.md found.'
 sample_project/README.md found.
-+ 2025-08-24 23:42:3223:42:32 '[' '!' -d /Volumes/home/anonymous/gerpa/sample_project/manuscript ']'
-+ 2025-08-24 23:42:3223:42:32 echo 'sample_project/manuscript directory created.'
++ 2025-08-25 01:49:0101:49:01 '[' '!' -d /Volumes/home/anonymous/gerpa/sample_project/manuscript ']'
++ 2025-08-25 01:49:0101:49:01 echo 'sample_project/manuscript directory created.'
 sample_project/manuscript directory created.
-+ 2025-08-24 23:42:3223:42:32 '[' '!' -f /Volumes/home/anonymous/gerpa/sample_project/manuscript/build/makerepref.py ']'
-+ 2025-08-24 23:42:3223:42:32 echo 'sample_project/manuscript/build/makerepref.py found.'
++ 2025-08-25 01:49:0101:49:01 '[' '!' -f /Volumes/home/anonymous/gerpa/sample_project/manuscript/build/makerepref.py ']'
++ 2025-08-25 01:49:0101:49:01 echo 'sample_project/manuscript/build/makerepref.py found.'
 sample_project/manuscript/build/makerepref.py found.
-+ 2025-08-24 23:42:3223:42:32 echo '--- Running makerepref.py script ---'
++ 2025-08-25 01:49:0101:49:01 echo '--- Running makerepref.py script ---'
 --- Running makerepref.py script ---
-+ 2025-08-24 23:42:3223:42:32 cd /Volumes/home/anonymous/gerpa/sample_project
-+ 2025-08-24 23:42:3223:42:32 python manuscript/build/makerepref.py --bibmerge --verbose
++ 2025-08-25 01:49:0101:49:01 cd /Volumes/home/anonymous/gerpa/sample_project
++ 2025-08-25 01:49:0101:49:01 python manuscript/build/makerepref.py --bibmerge --verbose
 Running bibmerge...
-Command: python manuscript/build/bibmerge.py manuscript/build/.bibpaths
-No *.bib files found to merge.
+Merged 1 *.bib files into manuscript/build/.bib.
 Concatenating markdown files...
 Rendering with quarto...
-Command: quarto render manuscript.md --to docx --output manuscript.docx --metadata-file=manuscript/build/head.yml
+Command: quarto render manuscript.qmd --to docx
+Rendering manuscript/build/manuscript.qmd to docx with metadata from manuscript/build/head.yml
 
-pandoc --output manuscript.docx
+pandoc 
   to: docx
+  output-file: manuscript.docx
   default-image-extension: png
-  reference-doc: manuscript/build/reference.docx
+  reference-doc: reference.docx
   variables: {}
   
 metadata
   title: My Manuscript
   author: John Doe
   date: '2025-08-24'
-  bibliography: manuscript/refs/refs.bib
-  csl: manuscript/build/vancouver.csl
-  reference-doc: manuscript/build/reference.docx
-  output:
-    word_document:
-      reference_docx: manuscript/build/reference.docx
+  bibliography:
+    - ../refs/refs.bib
+  csl: vancouver.csl
   
 Output created: manuscript.docx
 
 
-Cleaning up temporary files...
 Manuscript build complete.
-+ 2025-08-24 23:42:3223:42:32 '[' '!' -f /Volumes/home/anonymous/gerpa/sample_project/manuscript.docx ']'
-+ 2025-08-24 23:42:3223:42:32 echo 'sample_project/manuscript.docx found.'
-sample_project/manuscript.docx found.
-+ 2025-08-24 23:42:3223:42:32 echo '--- gerpa command test passed ---'
++ 2025-08-25 01:49:0101:49:01 '[' '!' -f /Volumes/home/anonymous/gerpa/sample_project/manuscript/build/manuscript.docx ']'
++ 2025-08-25 01:49:0101:49:01 echo 'sample_project/manuscript/build/manuscript.docx found.'
+sample_project/manuscript/build/manuscript.docx found.
++ 2025-08-25 01:49:0101:49:01 echo '--- gerpa command test passed ---'
 --- gerpa command test passed ---
-+ 2025-08-24 23:42:3223:42:32 echo '--- gerpa end-to-end test finished successfully ---'
++ 2025-08-25 01:49:0101:49:01 echo '--- gerpa end-to-end test finished successfully ---'
 --- gerpa end-to-end test finished successfully ---
-+ 2025-08-24 23:42:3223:42:32 cleanup
-+ 2025-08-24 23:42:3223:42:32 echo '--- Cleaning up ---'
++ 2025-08-25 01:49:0101:49:01 cleanup
++ 2025-08-25 01:49:0101:49:01 echo '--- Cleaning up ---'
 --- Cleaning up ---
-+ 2025-08-24 23:42:3223:42:32 rm -rf /Volumes/home/anonymous/gerpa/untracked
-+ 2025-08-24 23:42:3223:42:32 rm -f /home/anonymous.linux/.local/bin/gerpa
-+ 2025-08-24 23:42:3223:42:32 rm -rf /Volumes/home/anonymous/gerpa/sample_project
-+ 2025-08-24 23:42:3223:42:32 echo 'Cleanup complete.'
++ 2025-08-25 01:49:0101:49:01 rm -rf /Volumes/home/anonymous/gerpa/untracked
++ 2025-08-25 01:49:0101:49:01 rm -f /home/anonymous.linux/.local/bin/gerpa
++ 2025-08-25 01:49:0101:49:01 rm -rf /Volumes/home/anonymous/gerpa/sample_project
++ 2025-08-25 01:49:0101:49:01 echo 'Cleanup complete.'
 Cleanup complete.
-+ 2025-08-24 23:42:3223:42:32 cat /tmp/tmp.XzfIXGBdpe
++ 2025-08-25 01:49:0101:49:01 cat /tmp/tmp.GEPATKyATI

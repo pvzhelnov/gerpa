@@ -16,6 +16,6 @@ ipykernel==6.29.5
 click==8.2.1
 pytesseract==0.3.13
 pillow==11.3.0
-quarto
-python-docx
+quarto-cli==1.7.33
+python-docx==1.2.0
 ```

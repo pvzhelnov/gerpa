@@ -100,11 +100,11 @@ echo "sample_project/manuscript/build/makerepref.py found."
 echo "--- Running makerepref.py script ---"
 (cd "$PROJECT_ROOT/sample_project" && python manuscript/build/makerepref.py --bibmerge --verbose)
 
-if [ ! -f "$PROJECT_ROOT/sample_project/manuscript.docx" ]; then
-    echo "Error: sample_project/manuscript.docx not found."
+if [ ! -f "$PROJECT_ROOT/sample_project/manuscript/build/manuscript.docx" ]; then
+    echo "Error: sample_project/manuscript/build/manuscript.docx not found."
     exit 1
 fi
-echo "sample_project/manuscript.docx found."
+echo "sample_project/manuscript/build/manuscript.docx found."
 
 
 echo "--- gerpa command test passed ---"
